@@ -1487,3 +1487,109 @@ body {
 .btn-secondary:active:not(:disabled) {
     transform: translateY(0);
 }
+
+/* In your App.css, make sure these styles exist: */
+
+.sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #1F2937, #111827);
+    color: white;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 2rem 1rem;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1rem;
+    color: #9CA3AF;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    border: 1px solid transparent;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(4px);
+}
+
+.nav-item.active {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: white;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.nav-icon {
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    min-width: 24px;
+}
+
+.nav-label {
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+/* Add these styles to your App.css */
+
+/* NavLink styles */
+.sidebar-nav a {
+    text-decoration: none;
+}
+
+/* Active link styles */
+.sidebar-nav a.active {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: white;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* Remove default link styles from nav items */
+.nav-item {
+    color: #9CA3AF;
+    text-decoration: none;
+}
+
+.nav-item:hover {
+    color: white;
+}
