@@ -1,0 +1,14 @@
+com\moneymanager\model\Transaction.class
+com\moneymanager\dto\DashboardStatsDTO.class
+com\moneymanager\model\Budget.class
+com\moneymanager\controller\DashboardController.class
+com\moneymanager\MoneyManagerApplication$1.class
+com\moneymanager\controller\BudgetController.class
+com\moneymanager\repository\BudgetRepository.class
+com\moneymanager\service\TransactionService.class
+com\moneymanager\controller\TransactionController.class
+com\moneymanager\service\BudgetService.class
+com\moneymanager\repository\TransactionRepository.class
+com\moneymanager\dto\TransactionDTO.class
+com\moneymanager\MoneyManagerApplication.class
+com\moneymanager\service\DashboardService.class

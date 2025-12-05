@@ -1,0 +1,13 @@
+D:\test\money-manager\backend\src\main\java\com\moneymanager\service\TransactionService.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\service\DashboardService.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\repository\BudgetRepository.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\dto\DashboardStatsDTO.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\controller\TransactionController.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\controller\DashboardController.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\service\BudgetService.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\MoneyManagerApplication.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\repository\TransactionRepository.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\controller\BudgetController.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\model\Budget.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\model\Transaction.java
+D:\test\money-manager\backend\src\main\java\com\moneymanager\dto\TransactionDTO.java
