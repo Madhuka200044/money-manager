@@ -7,9 +7,40 @@ const Savings = () => {
     useEffect(() => {
         const saved = localStorage.getItem('savingsGoal');
         if (saved) {
-            setSavingsGoal(JSON.parse(saved));
+            try {
+                const parsed = JSON.parse(saved);
+                setSavingsGoal(parsed);
+            } catch (error) {
+                console.error('Error parsing savings goal:', error);
+            }
         }
     }, []);
+
+    // Get safe amount value
+    const getGoalAmount = () => {
+        if (!savingsGoal || !savingsGoal.amount) return 0;
+        return typeof savingsGoal.amount === 'number' ? savingsGoal.amount : 0;
+    };
+
+    // Get safe name value
+    const getGoalName = () => {
+        if (!savingsGoal || !savingsGoal.name) return 'Savings Goal';
+        return savingsGoal.name;
+    };
+
+    // Get safe created date
+    const getCreatedDate = () => {
+        if (!savingsGoal || !savingsGoal.createdAt) return new Date();
+        try {
+            return new Date(savingsGoal.createdAt);
+        } catch (error) {
+            return new Date();
+        }
+    };
+
+    const goalAmount = getGoalAmount();
+    const goalName = getGoalName();
+    const createdDate = getCreatedDate();
 
     return (
         <div className="dashboard">
@@ -29,7 +60,7 @@ const Savings = () => {
                 marginBottom: '2rem'
             }}>
                 <h2>Your Savings Goal</h2>
-                {savingsGoal ? (
+                {goalAmount > 0 ? (
                     <div style={{
                         background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
                         padding: '1.5rem',
@@ -37,13 +68,13 @@ const Savings = () => {
                         marginTop: '1rem'
                     }}>
                         <div style={{ fontSize: '1.1rem', color: '#0369a1', fontWeight: '600' }}>
-                            {savingsGoal.name || 'Savings Goal'}
+                            {goalName}
                         </div>
                         <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#0c4a6e', margin: '0.5rem 0' }}>
-                            ${savingsGoal.amount.toFixed(2)}
+                            ${goalAmount.toFixed(2)}
                         </div>
                         <div style={{ color: '#64748b' }}>
-                            Set on: {new Date(savingsGoal.createdAt).toLocaleDateString()}
+                            Set on: {createdDate.toLocaleDateString()}
                         </div>
                     </div>
                 ) : (

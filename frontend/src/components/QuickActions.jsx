@@ -168,15 +168,26 @@ const QuickActions = ({ onTransactionAdded }) => {
         setGoalModalOpen(true);
     };
 
-    const handleGoalSet = (amount) => {
-        localStorage.setItem('savingsGoal', amount.toString());
-        const percentage = amount > 0 ? Math.round((currentSavings / amount) * 100) : 0;
-        alert(`Savings goal set to $${amount.toFixed(2)}\n\nCurrent progress: $${currentSavings.toFixed(2)} (${percentage}%)`);
-        
-        if (onTransactionAdded) {
-            onTransactionAdded();
-        }
+   const handleGoalSet = (amount) => {
+    // Make sure we're saving valid data
+    const goalData = {
+        amount: parseFloat(amount) || 0,
+        name: 'Monthly Savings Goal', // Add a default name
+        createdAt: new Date().toISOString()
     };
+    
+    localStorage.setItem('savingsGoal', JSON.stringify(goalData));
+    
+    // Calculate percentage safely
+    const percentage = goalData.amount > 0 ? 
+        Math.round((currentSavings / goalData.amount) * 100) : 0;
+    
+    alert(`Savings goal set to $${goalData.amount.toFixed(2)}\n\nCurrent progress: $${currentSavings.toFixed(2)} (${percentage}%)`);
+    
+    if (onTransactionAdded) {
+        onTransactionAdded();
+    }
+};
 
     const handleExportData = async () => {
         setLoadingAction('export');
@@ -314,6 +325,7 @@ const QuickActions = ({ onTransactionAdded }) => {
             onTransactionAdded();
         }
     };
+    
 
     return (
         <>
