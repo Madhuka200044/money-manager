@@ -60,5 +60,15 @@ export const addTransaction = async (transactionData) => {
         throw error;
     }
 };
+// Add this function to your api.js file
+export const getChartData = async () => {
+    try {
+        const response = await api.get('/dashboard/chart-data');
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error fetching chart data:', error);
+        throw error;
+    }
+};
 
 export default api;

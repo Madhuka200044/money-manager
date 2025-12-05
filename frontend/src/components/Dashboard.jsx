@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import FinancialCards from './FinancialCards';
 import SpendingChart from './SpendingChart';
@@ -40,10 +41,11 @@ const Dashboard = () => {
             </div>
             
             <FinancialCards key={refreshKey} />
+            <SpendingChart refreshKey={refreshKey} />
             
             <div className="dashboard-content">
                 <div className="left-column">
-                    <SpendingChart />
+                    <SpendingChart key={refreshKey} /> {/* Add key prop here */}
                     <TransactionsTable key={refreshKey} />
                 </div>
                 

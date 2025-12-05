@@ -1025,3 +1025,26 @@ body {
         padding-bottom: 2rem;
     }
 }
+/* Add these styles to your App.css */
+.chart.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.loading-spinner {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.chart-error {
+    text-align: center;
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
