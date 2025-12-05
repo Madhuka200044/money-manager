@@ -40,12 +40,18 @@ const Dashboard = () => {
                 </div>
             </div>
             
+            {/* Add a title for the financial summary section */}
+            <div style={{ marginBottom: '1rem' }}>
+                <h2 style={{ fontSize: '1.3rem', fontWeight: '600', color: '#1F2937' }}>
+                    Financial Summary
+                </h2>
+            </div>
+            
             <FinancialCards key={refreshKey} />
-            <SpendingChart refreshKey={refreshKey} />
             
             <div className="dashboard-content">
                 <div className="left-column">
-                    <SpendingChart key={refreshKey} /> {/* Add key prop here */}
+                    <SpendingChart key={refreshKey} />
                     <TransactionsTable key={refreshKey} />
                 </div>
                 

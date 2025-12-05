@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getTransactions } from '../services/api';
 
@@ -22,14 +23,18 @@ const TransactionsTable = () => {
         return new Date(dateString).toLocaleDateString('en-US', options);
     };
 
-    const formatAmount = (amount) => {
-        const isNegative = amount < 0;
+    const formatAmount = (amount, type) => {
+        // Always show positive amounts with +/- sign based on type
         const absAmount = Math.abs(amount).toFixed(2);
-        return `${isNegative ? '-' : '+'}$${absAmount}`;
+        return `${type === 'INCOME' ? '+' : '-'}$${absAmount}`;
     };
 
     const getCategoryClass = (category) => {
         return category.toLowerCase().replace(' & ', '-').replace(' ', '-');
+    };
+
+    const getAmountColorClass = (type) => {
+        return type === 'INCOME' ? 'positive' : 'negative';
     };
 
     return (
@@ -54,7 +59,7 @@ const TransactionsTable = () => {
                                 <td className="description-cell">
                                     <div className="transaction-desc">
                                         <div className="transaction-icon">
-                                            {transaction.amount >= 0 ? '💰' : '💳'}
+                                            {transaction.type === 'INCOME' ? '💰' : '💳'}
                                         </div>
                                         <div>
                                             <div className="description-main">{transaction.description}</div>
@@ -68,8 +73,8 @@ const TransactionsTable = () => {
                                     </span>
                                 </td>
                                 <td className="date-cell">{formatDate(transaction.date)}</td>
-                                <td className={`amount ${transaction.amount >= 0 ? 'positive' : 'negative'}`}>
-                                    {formatAmount(transaction.amount)}
+                                <td className={`amount ${getAmountColorClass(transaction.type)}`}>
+                                    {formatAmount(transaction.amount, transaction.type)}
                                 </td>
                             </tr>
                         ))}
