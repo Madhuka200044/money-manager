@@ -1644,3 +1644,420 @@ input:checked + .slider:before {
     background: var(--card-bg);
     border-color: var(--border-color);
 }
+
+/* Add Transaction Button Styling */
+.btn-add-transaction {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED) !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
+}
+
+.btn-add-transaction:hover {
+    background: linear-gradient(135deg, #4338CA, #6D28D9) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4) !important;
+}
+
+/* Header actions spacing */
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .header-actions button {
+        width: 100%;
+    }
+}
+
+/* Add Transaction Modal - Matching Image Design */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 420px;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 24px 24px 16px;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+}
+
+.modal-subtitle {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 400;
+}
+
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: #9CA3AF;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    background: #F3F4F6;
+    color: #4B5563;
+}
+
+/* Form Styling */
+.modal-content form {
+    padding: 0 24px 24px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.section-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+/* Transaction Type Toggle - Like Image */
+.transaction-type-toggle {
+    display: flex;
+    background: #F3F4F6;
+    border-radius: 8px;
+    padding: 2px;
+    border: 1px solid #E5E7EB;
+}
+
+.type-toggle-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6B7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    font-family: inherit;
+}
+
+.type-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.type-toggle-btn.active {
+    background: #FFFFFF;
+    color: #111827;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.type-toggle-btn.active.income {
+    font-weight: 600;
+    color: #10B981;
+}
+
+.type-toggle-btn.active.expense {
+    font-weight: 600;
+    color: #EF4444;
+}
+
+/* Input Fields */
+.add-transaction-modal input[type="text"],
+.add-transaction-modal input[type="date"],
+.add-transaction-modal select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #111827;
+    background: #FFFFFF;
+    transition: border-color 0.2s;
+    font-family: inherit;
+}
+
+.add-transaction-modal input[type="text"]:focus,
+.add-transaction-modal input[type="date"]:focus,
+.add-transaction-modal select:focus {
+    outline: none;
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.add-transaction-modal input::placeholder {
+    color: #9CA3AF;
+}
+
+/* Date Input Styling */
+.add-transaction-modal input[type="date"] {
+    color: #111827;
+    cursor: pointer;
+}
+
+/* Select Dropdown Styling */
+.add-transaction-modal select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+/* Amount Input */
+.amount-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.currency-symbol {
+    position: absolute;
+    left: 14px;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 500;
+    pointer-events: none;
+}
+
+.amount-input {
+    padding-left: 28px !important;
+    font-weight: 500;
+}
+
+.amount-input::placeholder {
+    color: #9CA3AF;
+    font-weight: 400;
+}
+
+/* Form Row for Date and Amount */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+/* Action Buttons - Matching Image */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #E5E7EB;
+}
+
+.cancel-btn {
+    flex: 1;
+    padding: 10px 20px;
+    border: 1px solid #D1D5DB;
+    background: #FFFFFF;
+    color: #374151;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-align: center;
+}
+
+.cancel-btn:hover {
+    background: #F9FAFB;
+    border-color: #9CA3AF;
+}
+
+.cancel-btn:active {
+    background: #F3F4F6;
+}
+
+.add-btn {
+    flex: 1;
+    padding: 10px 20px;
+    background: #4F46E5;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-align: center;
+}
+
+.add-btn:hover:not(:disabled) {
+    background: #4338CA;
+}
+
+.add-btn:active:not(:disabled) {
+    background: #3730A3;
+}
+
+.add-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Error Message */
+.error-message {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #DC2626;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Loading Spinner */
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #FFFFFF;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .modal-overlay {
+        padding: 16px;
+    }
+    
+    .modal-content {
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    .modal-header,
+    .modal-content form {
+        padding: 20px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .cancel-btn,
+    .add-btn {
+        width: 100%;
+    }
+}
+
+/* Focus States for Accessibility */
+.add-transaction-modal input:focus-visible,
+.add-transaction-modal select:focus-visible,
+.type-toggle-btn:focus-visible,
+.cancel-btn:focus-visible,
+.add-btn:focus-visible {
+    outline: 2px solid #4F46E5;
+    outline-offset: 2px;
+}
+
+/* Remove number input arrows */
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.amount-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Custom scrollbar for dropdown */
+.add-transaction-modal select::-webkit-scrollbar {
+    width: 8px;
+}
+
+.add-transaction-modal select::-webkit-scrollbar-track {
+    background: #F3F4F6;
+    border-radius: 4px;
+}
+
+.add-transaction-modal select::-webkit-scrollbar-thumb {
+    background: #9CA3AF;
+    border-radius: 4px;
+}
+
+.add-transaction-modal select::-webkit-scrollbar-thumb:hover {
+    background: #6B7280;
+}

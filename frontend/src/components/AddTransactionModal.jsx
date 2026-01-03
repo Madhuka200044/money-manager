@@ -59,6 +59,15 @@ const AddTransactionModal = ({ isOpen, onClose, defaultType = 'EXPENSE', onTrans
         }));
     };
 
+    const handleTypeChange = (type) => {
+        setFormData(prev => ({
+            ...prev,
+            type: type,
+            // Reset category when type changes
+            category: type === 'INCOME' ? 'Salary' : 'Shopping'
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -114,9 +123,10 @@ const AddTransactionModal = ({ isOpen, onClose, defaultType = 'EXPENSE', onTrans
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content add-transaction-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2>{formData.type === 'INCOME' ? 'Add Income' : 'Add Expense'}</h2>
+                    <h2>Add Transaction</h2>
+                    <p className="modal-subtitle">Record a new income or expense transaction</p>
                     <button className="close-btn" onClick={onClose}>
                         <FiX />
                     </button>
@@ -129,28 +139,51 @@ const AddTransactionModal = ({ isOpen, onClose, defaultType = 'EXPENSE', onTrans
                 )}
 
                 <form onSubmit={handleSubmit}>
+                    {/* Transaction Type Section */}
                     <div className="form-group">
-                        <label>Description *</label>
+                        <label className="section-label">Transaction Type</label>
+                        <div className="transaction-type-toggle">
+                            <button
+                                type="button"
+                                className={`type-toggle-btn ${formData.type === 'INCOME' ? 'active income' : ''}`}
+                                onClick={() => handleTypeChange('INCOME')}
+                            >
+                                Income
+                            </button>
+                            <button
+                                type="button"
+                                className={`type-toggle-btn ${formData.type === 'EXPENSE' ? 'active expense' : ''}`}
+                                onClick={() => handleTypeChange('EXPENSE')}
+                            >
+                                Expense
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Description Section */}
+                    <div className="form-group">
+                        <label className="section-label">Description</label>
                         <input
                             type="text"
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            placeholder={`Enter ${formData.type === 'INCOME' ? 'income' : 'expense'} description`}
+                            placeholder="Enter transaction description"
                             required
                             autoFocus
                         />
                     </div>
 
+                    {/* Category Section */}
                     <div className="form-group">
-                        <label>Category</label>
+                        <label className="section-label">Category</label>
                         <select
                             name="category"
                             value={formData.category}
                             onChange={handleChange}
                             required
                         >
-                            <option value="">Select a category</option>
+                            <option value="" disabled>Select a category</option>
                             {getCategoriesForType(formData.type).map(category => (
                                 <option key={category} value={category}>
                                     {category}
@@ -159,9 +192,10 @@ const AddTransactionModal = ({ isOpen, onClose, defaultType = 'EXPENSE', onTrans
                         </select>
                     </div>
 
+                    {/* Date and Amount Row */}
                     <div className="form-row">
                         <div className="form-group">
-                            <label>Date</label>
+                            <label className="section-label">Date</label>
                             <input
                                 type="date"
                                 name="date"
@@ -172,7 +206,7 @@ const AddTransactionModal = ({ isOpen, onClose, defaultType = 'EXPENSE', onTrans
                         </div>
 
                         <div className="form-group">
-                            <label>Amount *</label>
+                            <label className="section-label">Amount</label>
                             <div className="amount-input-container">
                                 <span className="currency-symbol">$</span>
                                 <input
@@ -190,40 +224,11 @@ const AddTransactionModal = ({ isOpen, onClose, defaultType = 'EXPENSE', onTrans
                         </div>
                     </div>
 
-                    <div className="form-group">
-                        <label>Type</label>
-                        <div className="type-options">
-                            <label className="type-option">
-                                <input
-                                    type="radio"
-                                    name="type"
-                                    value="EXPENSE"
-                                    checked={formData.type === 'EXPENSE'}
-                                    onChange={handleChange}
-                                />
-                                <span className={`type-badge expense ${formData.type === 'EXPENSE' ? 'active' : ''}`}>
-                                    Expense
-                                </span>
-                            </label>
-                            <label className="type-option">
-                                <input
-                                    type="radio"
-                                    name="type"
-                                    value="INCOME"
-                                    checked={formData.type === 'INCOME'}
-                                    onChange={handleChange}
-                                />
-                                <span className={`type-badge income ${formData.type === 'INCOME' ? 'active' : ''}`}>
-                                    Income
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-
+                    {/* Action Buttons */}
                     <div className="modal-actions">
                         <button
                             type="button"
-                            className="btn-secondary"
+                            className="btn-secondary cancel-btn"
                             onClick={onClose}
                             disabled={loading}
                         >
@@ -231,7 +236,7 @@ const AddTransactionModal = ({ isOpen, onClose, defaultType = 'EXPENSE', onTrans
                         </button>
                         <button
                             type="submit"
-                            className="btn-primary"
+                            className="btn-primary add-btn"
                             disabled={loading}
                         >
                             {loading ? (
@@ -240,7 +245,7 @@ const AddTransactionModal = ({ isOpen, onClose, defaultType = 'EXPENSE', onTrans
                                     Adding...
                                 </>
                             ) : (
-                                `Add ${formData.type === 'INCOME' ? 'Income' : 'Expense'}`
+                                'Add Transaction'
                             )}
                         </button>
                     </div>
