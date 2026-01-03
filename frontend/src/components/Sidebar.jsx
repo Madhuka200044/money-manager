@@ -1,13 +1,11 @@
-
 import React from 'react';
 import { 
-    FiCreditCard, FiPieChart, FiTarget, 
-    FiDollarSign, FiFileText, FiSettings,
-    FiHome, FiBarChart2, FiTrendingUp,
-    FiBell, FiUser
+    FiCreditCard, FiTarget, FiSettings, FiHome, 
+    FiBarChart2, FiTrendingUp, FiBell, FiUser, 
+    FiMoon, FiSun 
 } from 'react-icons/fi';
 
-const Sidebar = ({ onNavigate, currentPage }) => {
+const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme }) => {
     const menuItems = [
         { icon: <FiHome />, label: 'Dashboard', id: 'dashboard' },
         { icon: <FiCreditCard />, label: 'Transactions', id: 'transactions' },
@@ -21,35 +19,31 @@ const Sidebar = ({ onNavigate, currentPage }) => {
     const handleNavigation = (pageId) => {
         if (onNavigate && typeof onNavigate === 'function') {
             onNavigate(pageId);
-        } else {
-            console.error('onNavigate is not a function or not provided');
-            // Fallback: Reload the page or show error
-            alert(`Would navigate to: ${pageId}`);
         }
     };
 
     return (
         <div className="sidebar">
+            {/* App Logo */}
             <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: '16px', 
-                marginBottom: '2rem',
-                paddingLeft: '1rem',
-                cursor: 'pointer'
-            }} onClick={() => handleNavigation('dashboard')}>
+                marginBottom: '3rem',
+                padding: '0 1rem'
+            }}>
                 <div style={{
-                    width: '48px',
-                    height: '48px',
+                    width: '52px',
+                    height: '52px',
                     background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
-                    borderRadius: '12px',
+                    borderRadius: '14px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: 'white',
-                    fontSize: '1.8rem',
+                    fontSize: '2rem',
                     fontWeight: 'bold',
-                    boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
+                    boxShadow: '0 6px 20px rgba(79, 70, 229, 0.4)'
                 }}>
                     💰
                 </div>
@@ -76,6 +70,75 @@ const Sidebar = ({ onNavigate, currentPage }) => {
                     </p>
                 </div>
             </div>
+            
+            {/* Theme Toggle */}
+            <div style={{
+                marginBottom: '2rem',
+                padding: '0 1rem'
+            }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    borderRadius: '12px',
+                    padding: '0.875rem 1rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                }} 
+                onClick={toggleTheme}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+                >
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem'
+                    }}>
+                        <div style={{
+                            color: isDarkMode ? '#FBBF24' : '#a5b4fc',
+                            fontSize: '1.2rem',
+                            transition: 'all 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            {isDarkMode ? <FiSun /> : <FiMoon />}
+                        </div>
+                        <span style={{
+                            color: '#D1D5DB',
+                            fontSize: '0.9rem',
+                            fontWeight: '600'
+                        }}>
+                            {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                        </span>
+                    </div>
+                    <div style={{
+                        position: 'relative',
+                        width: '52px',
+                        height: '26px',
+                        background: isDarkMode ? '#4F46E5' : 'rgba(255, 255, 255, 0.2)',
+                        borderRadius: '13px',
+                        transition: 'all 0.3s ease',
+                        border: isDarkMode ? 'none' : '1px solid rgba(255, 255, 255, 0.3)'
+                    }}>
+                        <div style={{
+                            position: 'absolute',
+                            top: '3px',
+                            left: isDarkMode ? '28px' : '3px',
+                            width: '20px',
+                            height: '20px',
+                            background: 'white',
+                            borderRadius: '50%',
+                            transition: 'all 0.3s ease',
+                            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)'
+                        }} />
+                    </div>
+                </div>
+            </div>
+            
+            {/* Navigation Menu */}
             <nav className="sidebar-nav">
                 {menuItems.map((item, index) => (
                     <div 
@@ -90,63 +153,77 @@ const Sidebar = ({ onNavigate, currentPage }) => {
                             padding: '0.875rem 1rem',
                             color: '#9CA3AF',
                             textDecoration: 'none',
-                            borderRadius: '8px',
+                            borderRadius: '10px',
                             transition: 'all 0.3s ease',
-                            fontWeight: '500'
+                            fontWeight: '500',
+                            margin: '0.25rem 0'
                         }}
                     >
                         <span className="nav-icon" style={{ 
-                            fontSize: '1.2rem',
+                            fontSize: '1.25rem',
                             display: 'flex',
                             alignItems: 'center'
                         }}>
                             {item.icon}
                         </span>
-                        <span className="nav-label" style={{ fontSize: '0.95rem' }}>
+                        <span className="nav-label" style={{ 
+                            fontSize: '0.95rem',
+                            fontWeight: '600'
+                        }}>
                             {item.label}
                         </span>
                     </div>
                 ))}
             </nav>
             
-            {/* User profile at bottom */}
+            {/* User Profile */}
             <div style={{
                 position: 'absolute',
                 bottom: '2rem',
                 left: '1rem',
                 right: '1rem',
-                padding: '1rem',
-                background: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: '10px',
+                padding: '1.25rem',
+                background: 'rgba(255, 255, 255, 0.08)',
+                borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
-                cursor: 'pointer'
-            }} onClick={() => handleNavigation('settings')}>
+                cursor: 'pointer',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.3s ease'
+            }} 
+            onClick={() => handleNavigation('settings')}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+            >
                 <div style={{
-                    width: '40px',
-                    height: '40px',
+                    width: '44px',
+                    height: '44px',
                     background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: 'white'
+                    color: 'white',
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
                 }}>
-                    <FiUser size={20} />
+                    JD
                 </div>
-                <div>
+                <div style={{ flex: 1 }}>
                     <div style={{ 
                         color: 'white', 
-                        fontWeight: '600',
-                        fontSize: '0.9rem'
+                        fontWeight: '700',
+                        fontSize: '0.95rem',
+                        marginBottom: '2px'
                     }}>
                         John Doe
                     </div>
                     <div style={{ 
-                        color: '#9CA3AF', 
+                        color: '#a5b4fc', 
                         fontSize: '0.8rem',
-                        marginTop: '2px'
+                        fontWeight: '500'
                     }}>
                         Premium User
                     </div>
@@ -156,10 +233,11 @@ const Sidebar = ({ onNavigate, currentPage }) => {
     );
 };
 
-// Add default props for safety
 Sidebar.defaultProps = {
     onNavigate: () => console.warn('onNavigate not provided'),
-    currentPage: 'dashboard'
+    currentPage: 'dashboard',
+    isDarkMode: false,
+    toggleTheme: () => console.warn('toggleTheme not provided')
 };
 
 export default Sidebar;

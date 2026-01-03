@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
     LineChart, Line, XAxis, YAxis, CartesianGrid, 
@@ -6,23 +5,19 @@ import {
 } from 'recharts';
 import { getTransactions } from '../services/api';
 
-const SpendingChart = ({ refreshKey }) => { // Accept refreshKey as prop
+const SpendingChart = ({ refreshKey }) => {
     const [chartData, setChartData] = useState([]);
 
     useEffect(() => {
-        // This will re-run every time refreshKey changes
         const loadChartData = async () => {
             try {
-                // Try to get real data first
                 const response = await getTransactions();
                 const transactions = response.data || [];
                 
                 if (transactions.length > 0) {
-                    // Process transactions into chart data
                     const processedData = processTransactions(transactions);
                     setChartData(processedData);
                 } else {
-                    // Fallback to static data if no transactions
                     setChartData(getStaticData());
                 }
             } catch (error) {
@@ -32,9 +27,8 @@ const SpendingChart = ({ refreshKey }) => { // Accept refreshKey as prop
         };
         
         loadChartData();
-    }, [refreshKey]); // Add refreshKey as dependency
+    }, [refreshKey]);
 
-    // Process transactions into monthly data
     const processTransactions = (transactions) => {
         const monthlyTotals = {};
         
@@ -53,7 +47,6 @@ const SpendingChart = ({ refreshKey }) => { // Accept refreshKey as prop
             }
         });
         
-        // Convert to array and sort
         const result = Object.values(monthlyTotals);
         const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         result.sort((a, b) => monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month));
@@ -61,7 +54,6 @@ const SpendingChart = ({ refreshKey }) => { // Accept refreshKey as prop
         return result;
     };
 
-    // Static fallback data
     const getStaticData = () => {
         return [
             { month: 'Jan', income: 5200, expenses: 3400 },
@@ -80,49 +72,68 @@ const SpendingChart = ({ refreshKey }) => { // Accept refreshKey as prop
     const data = chartData.length > 0 ? chartData : getStaticData();
 
     return (
-        <div className="chart-container">
+        <div className="chart-section">
             <h3>Spending Overview</h3>
             <div className="chart">
                 <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                    <LineChart 
+                        data={data} 
+                        margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                    >
+                        <CartesianGrid 
+                            strokeDasharray="3 3" 
+                            stroke="#E5E7EB" 
+                            vertical={false}
+                        />
                         <XAxis 
                             dataKey="month" 
-                            stroke="#666"
-                            tick={{ fill: '#666' }}
+                            stroke="#6B7280"
+                            tick={{ fill: '#6B7280', fontSize: 12 }}
+                            axisLine={false}
+                            tickLine={false}
                         />
                         <YAxis 
-                            stroke="#666"
-                            tick={{ fill: '#666' }}
+                            stroke="#6B7280"
+                            tick={{ fill: '#6B7280', fontSize: 12 }}
+                            axisLine={false}
+                            tickLine={false}
                             tickFormatter={(value) => `$${value}`}
                         />
                         <Tooltip 
-                            formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']}
+                            formatter={(value) => [`$${value.toLocaleString()}`, 'Amount']}
                             labelFormatter={(label) => `Month: ${label}`}
                             contentStyle={{
                                 backgroundColor: 'white',
-                                border: '1px solid #ddd',
-                                borderRadius: '5px'
+                                border: '1px solid #E5E7EB',
+                                borderRadius: '8px',
+                                padding: '12px',
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                             }}
+                            labelStyle={{ color: '#1F2937', fontWeight: 600 }}
                         />
-                        <Legend />
+                        <Legend 
+                            verticalAlign="top"
+                            height={36}
+                            iconType="circle"
+                            iconSize={8}
+                        />
                         <Line 
                             type="monotone" 
                             dataKey="income" 
-                            stroke="#4CAF50" 
+                            stroke="#4F46E5" 
                             strokeWidth={3}
                             name="Income"
-                            dot={{ stroke: '#4CAF50', strokeWidth: 2, r: 4 }}
-                            activeDot={{ r: 6 }}
+                            dot={{ stroke: '#4F46E5', strokeWidth: 2, r: 4 }}
+                            activeDot={{ r: 6, strokeWidth: 2 }}
                         />
                         <Line 
                             type="monotone" 
                             dataKey="expenses" 
-                            stroke="#F44336" 
+                            stroke="#10B981" 
                             strokeWidth={3}
                             name="Expenses"
-                            dot={{ stroke: '#F44336', strokeWidth: 2, r: 4 }}
-                            activeDot={{ r: 6 }}
+                            dot={{ stroke: '#10B981', strokeWidth: 2, r: 4 }}
+                            activeDot={{ r: 6, strokeWidth: 2 }}
                         />
                     </LineChart>
                 </ResponsiveContainer>
