@@ -2039,9 +2039,9 @@ input:checked + .slider:before {
     margin: 0;
 }
 
-.amount-input[type=number] {
+/*.amount-input[type=number] {
     -moz-appearance: textfield;
-}
+}*/
 
 /* Custom scrollbar for dropdown */
 .add-transaction-modal select::-webkit-scrollbar {
@@ -2060,4 +2060,103 @@ input:checked + .slider:before {
 
 .add-transaction-modal select::-webkit-scrollbar-thumb:hover {
     background: #6B7280;
+}
+
+/* Add to App.css */
+
+/* Analytics specific styles */
+.chart-section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.chart-section h3 {
+    margin-bottom: 1.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark-color);
+}
+
+.insight-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.insight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.insight-positive {
+    border-left: 4px solid #10B981;
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.insight-warning {
+    border-left: 4px solid #F59E0B;
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.insight-negative {
+    border-left: 4px solid #EF4444;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+/* Analytics grid layouts */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.analytics-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .analytics-chart-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Pattern indicators */
+.pattern-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.pattern-up {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.pattern-down {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.pattern-neutral {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--text-light);
 }

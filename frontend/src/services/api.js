@@ -38,34 +38,9 @@ export const getTransactions = async () => {
         return { data: response.data };
     } catch (error) {
         console.error('Error fetching transactions:', error);
-        // Return mock data if API fails
+        // Return comprehensive mock data for analytics
         return { 
-            data: [
-                {
-                    id: 1,
-                    description: 'Salary',
-                    category: 'Salary',
-                    date: '2025-12-05',
-                    amount: 10000,
-                    type: 'INCOME'
-                },
-                {
-                    id: 2,
-                    description: 'Sell car',
-                    category: 'Business',
-                    date: '2025-12-05',
-                    amount: 15000,
-                    type: 'INCOME'
-                },
-                {
-                    id: 3,
-                    description: 'Buy good',
-                    category: 'Food & Dining',
-                    date: '2025-12-05',
-                    amount: 750,
-                    type: 'EXPENSE'
-                }
-            ]
+            data: generateMockTransactions()
         };
     }
 };
@@ -137,6 +112,63 @@ export const addTransaction = async (transactionData) => {
             }
         };
     }
+};
+
+// Generate comprehensive mock transactions for analytics
+const generateMockTransactions = () => {
+    const categories = [
+        'Shopping', 'Food & Dining', 'Transportation', 
+        'Bills & Utilities', 'Entertainment', 'Healthcare',
+        'Education', 'Investment', 'Salary', 'Freelance', 'Business'
+    ];
+    
+    const descriptions = {
+        'Shopping': ['Amazon Purchase', 'Clothing Store', 'Electronics', 'Home Decor'],
+        'Food & Dining': ['Groceries', 'Restaurant', 'Coffee Shop', 'Food Delivery'],
+        'Transportation': ['Fuel', 'Public Transport', 'Taxi', 'Car Maintenance'],
+        'Bills & Utilities': ['Electricity', 'Water', 'Internet', 'Phone Bill'],
+        'Entertainment': ['Movie Tickets', 'Streaming Service', 'Concert', 'Games'],
+        'Healthcare': ['Doctor Visit', 'Medication', 'Health Insurance', 'Gym'],
+        'Education': ['Books', 'Course', 'Software', 'Workshop'],
+        'Investment': ['Stocks', 'Crypto', 'Mutual Funds', 'Bonds'],
+        'Salary': ['Monthly Salary', 'Bonus', 'Commission'],
+        'Freelance': ['Freelance Project', 'Consulting Fee'],
+        'Business': ['Business Income', 'Client Payment']
+    };
+    
+    const mockData = [];
+    const now = new Date();
+    
+    // Generate 50 transactions
+    for (let i = 0; i < 150; i++) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - Math.floor(Math.random() * 365));
+        
+        const category = categories[Math.floor(Math.random() * categories.length)];
+        const isIncome = category === 'Salary' || category === 'Freelance' || category === 'Business' || Math.random() > 0.7;
+        const type = isIncome ? 'INCOME' : 'EXPENSE';
+        
+        let amount;
+        if (type === 'INCOME') {
+            amount = Math.floor(Math.random() * 5000) + 1000;
+        } else {
+            amount = Math.floor(Math.random() * 500) + 10;
+        }
+        
+        const categoryDescriptions = descriptions[category] || ['Transaction'];
+        const description = categoryDescriptions[Math.floor(Math.random() * categoryDescriptions.length)];
+        
+        mockData.push({
+            id: i + 1,
+            description: type === 'INCOME' ? `Income: ${description}` : description,
+            category,
+            date: date.toISOString().split('T')[0],
+            amount,
+            type
+        });
+    }
+    
+    return mockData;
 };
 
 export default api;
