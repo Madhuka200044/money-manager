@@ -2160,3 +2160,147 @@ input:checked + .slider:before {
     background: rgba(107, 114, 128, 0.1);
     color: var(--text-light);
 }
+
+/* ===== BILLS SECTION ===== */
+.bills-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.bills-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.bill-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.bill-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+.bill-item.paid {
+    opacity: 0.7;
+    background: var(--light-color);
+}
+
+.bill-info h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+.bill-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
+
+.bill-status {
+    font-weight: 500;
+}
+
+.bill-status.overdue {
+    color: var(--danger-color);
+    background: rgba(239, 68, 68, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.bill-status.due-soon {
+    color: var(--warning-color);
+    background: rgba(245, 158, 11, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.bill-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.bill-amount {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark-color);
+}
+
+.btn-mark-paid {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+}
+
+.btn-mark-paid:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-mark-paid.paid {
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+    background: transparent;
+    cursor: default;
+}
+
+.btn-delete {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+/* Add Bill Modal Specifics */
+.add-transaction-modal {
+    max-width: 600px;
+}
+
+@media (max-width: 768px) {
+    .bill-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .bill-actions {
+        width: 100%;
+        justify-content: space-between;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+}

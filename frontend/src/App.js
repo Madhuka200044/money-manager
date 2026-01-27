@@ -1,87 +1,89 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Transactions from './components/Transactions';
+import Analytics from './components/Analytics';
 import Budget from './components/Budget';
 import Savings from './components/Savings';
 import Bills from './components/Bills';
 import Settings from './components/Settings';
-import Analytics from './components/Analytics'; // Import the enhanced Analytics component
 import './App.css';
 
 function App() {
-    const [currentPage, setCurrentPage] = useState('dashboard');
-    const [isDarkMode, setIsDarkMode] = useState(false);
-    const [refreshKey, setRefreshKey] = useState(0);
+  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-    // Load theme from localStorage on mount
-    useEffect(() => {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            setIsDarkMode(true);
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
-    }, []);
+  useEffect(() => {
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('darkMode');
+    if (savedTheme === 'true') {
+      setIsDarkMode(true);
+      document.body.classList.add('dark-mode');
+    }
+    
+    // Check for saved page preference
+    const savedPage = localStorage.getItem('currentPage');
+    if (savedPage && ['dashboard', 'transactions', 'analytics', 'budget', 'savings', 'bills', 'settings'].includes(savedPage)) {
+      setCurrentPage(savedPage);
+    }
+  }, []);
 
-    const toggleTheme = () => {
-        const newTheme = !isDarkMode;
-        setIsDarkMode(newTheme);
-        
-        if (newTheme) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.documentElement.setAttribute('data-theme', 'light');
-            localStorage.setItem('theme', 'light');
-        }
-    };
+  const handleNavigation = (page) => {
+    setCurrentPage(page);
+    localStorage.setItem('currentPage', page);
+  };
 
-    const handleTransactionAdded = () => {
-        setRefreshKey(prev => prev + 1);
-    };
+  const toggleTheme = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode);
+    
+    if (newDarkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  };
 
-    const renderPage = () => {
-        switch (currentPage) {
-            case 'transactions':
-                return <Transactions refreshKey={refreshKey} />;
-            case 'analytics':
-                return <Analytics />;
-            case 'budget':
-                return <Budget refreshKey={refreshKey} />;
-            case 'savings':
-                return <Savings refreshKey={refreshKey} />;
-            case 'bills':
-                return <Bills />;
-            case 'settings':
-                return <Settings />;
-            case 'dashboard':
-            default:
-                return (
-                    <Dashboard 
-                        isDarkMode={isDarkMode}
-                        toggleTheme={toggleTheme}
-                        refreshKey={refreshKey}
-                        setRefreshKey={setRefreshKey}
-                        onTransactionAdded={handleTransactionAdded}
-                    />
-                );
-        }
-    };
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
-    return (
-        <div className="app">
-            <Sidebar 
-                onNavigate={setCurrentPage}
-                currentPage={currentPage}
-                isDarkMode={isDarkMode}
-                toggleTheme={toggleTheme}
-            />
-            <main className="main-content">
-                {renderPage()}
-            </main>
-        </div>
-    );
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'dashboard':
+        return <Dashboard refreshKey={refreshKey} setRefreshKey={setRefreshKey} />;
+      case 'transactions':
+        return <Transactions />;
+      case 'analytics':
+        return <Analytics />;
+      case 'budget':
+        return <Budget />;
+      case 'savings':
+        return <Savings refreshKey={refreshKey} />;
+      case 'bills':
+        return <Bills />;
+      case 'settings':
+        return <Settings />;
+      default:
+        return <Dashboard refreshKey={refreshKey} setRefreshKey={setRefreshKey} />;
+    }
+  };
+
+  return (
+    <div className="app">
+      <Sidebar 
+        onNavigate={handleNavigation} 
+        currentPage={currentPage}
+        isDarkMode={isDarkMode}
+        toggleTheme={toggleTheme}
+      />
+      <main className="main-content">
+        {renderPage()}
+      </main>
+    </div>
+  );
 }
 
 export default App;
