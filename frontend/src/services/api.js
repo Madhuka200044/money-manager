@@ -97,6 +97,36 @@ export const getBudgets = async () => {
     }
 };
 
+export const addBudget = async (budgetData) => {
+    try {
+        const response = await api.post('/budgets', budgetData);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error adding budget:', error);
+        throw error;
+    }
+};
+
+export const updateBudget = async (id, budgetData) => {
+    try {
+        const response = await api.put(`/budgets/${id}`, budgetData);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error updating budget:', error);
+        throw error;
+    }
+};
+
+export const deleteBudget = async (id) => {
+    try {
+        const response = await api.delete(`/budgets/${id}`);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error deleting budget:', error);
+        throw error;
+    }
+};
+
 
 export const addTransaction = async (transactionData) => {
     try {
