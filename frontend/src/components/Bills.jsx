@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiX, FiCheck, FiClock, FiAlertCircle } from 'react-icons/fi';
-import { getBills, addBill, toggleBillStatus, deleteBill } from '../services/api';
+import { getBills, addBill, toggleBillStatus, deleteBill, addTransaction } from '../services/api';
 
 const Bills = () => {
     const [bills, setBills] = useState([]);
@@ -142,9 +142,30 @@ const Bills = () => {
 
     const handleToggleStatus = async (id) => {
         try {
+            const billToUpdate = bills.find(b => b.id === id);
+            if (!billToUpdate) return;
+
             // Try API first
             try {
                 await toggleBillStatus(id);
+
+                // If we are marking as PAID (it was false before), create a transaction
+                if (!billToUpdate.isPaid) {
+                    try {
+                        await addTransaction({
+                            description: `Bill Payment: ${billToUpdate.description}`,
+                            amount: Number(billToUpdate.amount),
+                            type: 'EXPENSE',
+                            category: billToUpdate.category,
+                            date: new Date().toISOString().split('T')[0]
+                        });
+                        alert('Bill marked as paid and transaction recorded!');
+                    } catch (txError) {
+                        console.error('Failed to create transaction for bill', txError);
+                        // Don't fail the whole operation if just transaction creation fails
+                    }
+                }
+
             } catch (apiError) {
                 console.log('API failed, updating locally');
                 // Update in local storage
@@ -153,6 +174,21 @@ const Bills = () => {
                     bill.id === id ? { ...bill, isPaid: !bill.isPaid } : bill
                 );
                 localStorage.setItem('bills', JSON.stringify(updatedBills));
+
+                // Create local transaction if paying
+                if (!billToUpdate.isPaid) {
+                    const storedTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+                    storedTransactions.unshift({
+                        id: Date.now(),
+                        description: `Bill Payment: ${billToUpdate.description}`,
+                        amount: Number(billToUpdate.amount),
+                        type: 'EXPENSE',
+                        category: billToUpdate.category,
+                        date: new Date().toISOString().split('T')[0]
+                    });
+                    localStorage.setItem('transactions', JSON.stringify(storedTransactions));
+                    alert('Bill marked as paid and transaction recorded locally!');
+                }
             }
 
             // Update local state

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    FiTarget, FiTrendingUp, FiCalendar, FiDollarSign, 
+import {
+    FiTarget, FiTrendingUp, FiCalendar, FiDollarSign,
     FiPercent, FiClock, FiCheckCircle, FiAlertCircle,
     FiPlus, FiEdit2, FiTrash2, FiDownload, FiShare
 } from 'react-icons/fi';
-import { 
-    LineChart, Line, AreaChart, Area, XAxis, YAxis, 
+import {
+    LineChart, Line, AreaChart, Area, XAxis, YAxis,
     CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     PieChart, Pie, Cell
 } from 'recharts';
-import { getTransactions, getDashboardStats } from '../services/api';
+import { getTransactions, getDashboardStats, addTransaction } from '../services/api';
 
 const Savings = ({ refreshKey }) => {
     const [savingsGoal, setSavingsGoal] = useState(null);
@@ -17,6 +17,8 @@ const Savings = ({ refreshKey }) => {
     const [stats, setStats] = useState({});
     const [loading, setLoading] = useState(true);
     const [showGoalModal, setShowGoalModal] = useState(false);
+    const [showAddFundsModal, setShowAddFundsModal] = useState(false);
+    const [addFundsAmount, setAddFundsAmount] = useState('');
     const [editMode, setEditMode] = useState(false);
     const [goalForm, setGoalForm] = useState({
         name: '',
@@ -56,7 +58,7 @@ const Savings = ({ refreshKey }) => {
                 getTransactions(),
                 getDashboardStats()
             ]);
-            
+
             setTransactions(transactionsResponse.data || []);
             setStats(statsResponse.data || {});
         } catch (error) {
@@ -73,23 +75,23 @@ const Savings = ({ refreshKey }) => {
         const targetAmount = parseFloat(savingsGoal.targetAmount || savingsGoal.amount || 0);
         const currentAmount = parseFloat(savingsGoal.currentAmount || 0);
         const targetDate = savingsGoal.targetDate ? new Date(savingsGoal.targetDate) : null;
-        
+
         const progress = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
         const remainingAmount = Math.max(0, targetAmount - currentAmount);
-        
+
         // Calculate days remaining
         let daysRemaining = null;
         let dailyRequired = null;
         let isOnTrack = true;
-        
+
         if (targetDate) {
             const today = new Date();
             const timeDiff = targetDate.getTime() - today.getTime();
             daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
-            
+
             if (daysRemaining > 0) {
                 dailyRequired = remainingAmount / daysRemaining;
-                
+
                 // Check if on track (less than 30 days behind schedule)
                 const expectedProgress = (targetAmount / (365 * 3)) * (365 * 3 - daysRemaining);
                 isOnTrack = currentAmount >= expectedProgress * 0.8; // 80% of expected progress
@@ -126,7 +128,7 @@ const Savings = ({ refreshKey }) => {
             alert('Please enter a goal name');
             return;
         }
-        
+
         if (!goalForm.targetAmount || parseFloat(goalForm.targetAmount) <= 0) {
             alert('Please enter a valid target amount');
             return;
@@ -143,13 +145,13 @@ const Savings = ({ refreshKey }) => {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
-        
+
         console.log('Saving goal:', newGoal);
         localStorage.setItem('savingsGoal', JSON.stringify(newGoal));
         setSavingsGoal(newGoal);
         setShowGoalModal(false);
         setEditMode(false);
-        
+
         // Reset form
         setGoalForm({
             name: '',
@@ -158,7 +160,7 @@ const Savings = ({ refreshKey }) => {
             currentAmount: '',
             category: 'General'
         });
-        
+
         alert('Savings goal saved successfully!');
     };
 
@@ -177,18 +179,68 @@ const Savings = ({ refreshKey }) => {
         }
     };
 
+    const handleAddFunds = async (e) => {
+        e.preventDefault();
+        if (!addFundsAmount || parseFloat(addFundsAmount) <= 0) {
+            alert('Please enter a valid amount');
+            return;
+        }
+
+        const amount = parseFloat(addFundsAmount);
+        const newCurrentAmount = (savingsGoal.currentAmount || 0) + amount;
+
+        const updatedGoal = {
+            ...savingsGoal,
+            currentAmount: newCurrentAmount,
+            updatedAt: new Date().toISOString()
+        };
+
+        // Update Goal
+        localStorage.setItem('savingsGoal', JSON.stringify(updatedGoal));
+        setSavingsGoal(updatedGoal);
+
+        // Create Transaction
+        try {
+            await addTransaction({
+                description: `Savings: ${savingsGoal.name}`,
+                amount: amount,
+                type: 'EXPENSE', // Money allocated to savings effectively leaves "cash" or is an expense against liquid cash
+                category: 'Investment', // Or Savings
+                date: new Date().toISOString().split('T')[0]
+            });
+            alert('Funds added and transaction recorded!');
+        } catch (error) {
+            console.error('Error creating transaction for savings:', error);
+            // Fallback for local
+            const storedTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            storedTransactions.unshift({
+                id: Date.now(),
+                description: `Savings: ${savingsGoal.name}`,
+                amount: amount,
+                type: 'EXPENSE',
+                category: 'Investment',
+                date: new Date().toISOString().split('T')[0]
+            });
+            localStorage.setItem('transactions', JSON.stringify(storedTransactions));
+            alert('Funds added and transaction recorded locally!');
+        }
+
+        setShowAddFundsModal(false);
+        setAddFundsAmount('');
+    };
+
     const exportSavingsReport = () => {
         if (!savingsGoal) {
             alert('No savings goal to export');
             return;
         }
-        
+
         const reportData = {
             goal: savingsGoal,
             metrics,
             exportDate: new Date().toISOString()
         };
-        
+
         const dataStr = JSON.stringify(reportData, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
@@ -203,7 +255,7 @@ const Savings = ({ refreshKey }) => {
 
     const shareGoal = () => {
         if (!savingsGoal) return;
-        
+
         if (navigator.share) {
             navigator.share({
                 title: `My Savings Goal: ${savingsGoal.name}`,
@@ -238,12 +290,12 @@ const Savings = ({ refreshKey }) => {
                 borderRadius: '50%',
                 transform: 'translate(100px, -100px)'
             }} />
-            
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                 <div>
-                    <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: '0.75rem',
                         marginBottom: '0.5rem'
                     }}>
@@ -261,37 +313,37 @@ const Savings = ({ refreshKey }) => {
                             <FiTarget />
                         </div>
                         <div>
-                            <h2 style={{ 
-                                fontSize: '1.5rem', 
-                                fontWeight: '700', 
+                            <h2 style={{
+                                fontSize: '1.5rem',
+                                fontWeight: '700',
                                 color: 'var(--text-color)',
                                 margin: 0
                             }}>
                                 {savingsGoal?.name || 'Savings Goal'}
                             </h2>
-                            <div style={{ 
-                                fontSize: '0.875rem', 
+                            <div style={{
+                                fontSize: '0.875rem',
                                 color: 'var(--text-light)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem'
                             }}>
                                 <FiCalendar size={14} />
-                                {savingsGoal?.targetDate ? 
+                                {savingsGoal?.targetDate ?
                                     `Target: ${new Date(savingsGoal.targetDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}` :
                                     'No target date set'
                                 }
                             </div>
                         </div>
                     </div>
-                    
-                    <div style={{ 
-                        fontSize: '0.875rem', 
+
+                    <div style={{
+                        fontSize: '0.875rem',
                         color: 'var(--text-light)',
                         marginTop: '0.5rem'
                     }}>
-                        Category: <span style={{ 
-                            fontWeight: '600', 
+                        Category: <span style={{
+                            fontWeight: '600',
                             color: 'var(--primary-color)',
                             background: 'rgba(79, 70, 229, 0.1)',
                             padding: '0.25rem 0.75rem',
@@ -302,9 +354,27 @@ const Savings = ({ refreshKey }) => {
                         </span>
                     </div>
                 </div>
-                
+
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button 
+                    <button
+                        onClick={() => setShowAddFundsModal(true)}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            background: 'var(--primary-color)',
+                            border: 'none',
+                            borderRadius: '8px',
+                            color: 'white',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            fontWeight: '600',
+                            boxShadow: '0 2px 5px rgba(79, 70, 229, 0.3)'
+                        }}
+                    >
+                        <FiPlus /> Add Funds
+                    </button>
+                    <button
                         onClick={() => {
                             setGoalForm({
                                 name: savingsGoal.name || '',
@@ -331,7 +401,7 @@ const Savings = ({ refreshKey }) => {
                     >
                         <FiEdit2 /> Edit
                     </button>
-                    <button 
+                    <button
                         onClick={handleDeleteGoal}
                         style={{
                             padding: '0.5rem 1rem',
@@ -350,7 +420,7 @@ const Savings = ({ refreshKey }) => {
                     </button>
                 </div>
             </div>
-            
+
             {/* Progress Section */}
             <div style={{ marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -371,7 +441,7 @@ const Savings = ({ refreshKey }) => {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Progress Bar */}
                 <div style={{
                     height: '12px',
@@ -380,7 +450,7 @@ const Savings = ({ refreshKey }) => {
                     overflow: 'hidden',
                     marginBottom: '1rem'
                 }}>
-                    <div 
+                    <div
                         style={{
                             height: '100%',
                             background: 'linear-gradient(90deg, #4F46E5, #7C3AED)',
@@ -390,13 +460,13 @@ const Savings = ({ refreshKey }) => {
                         }}
                     />
                 </div>
-                
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--text-light)' }}>
                     <span>${metrics?.currentAmount?.toLocaleString()}</span>
                     <span>${metrics?.targetAmount?.toLocaleString()}</span>
                 </div>
             </div>
-            
+
             {/* Stats Grid */}
             <div style={{
                 display: 'grid',
@@ -420,7 +490,7 @@ const Savings = ({ refreshKey }) => {
                         {metrics?.daysRemaining !== null ? metrics.daysRemaining : 'N/A'}
                     </div>
                 </div>
-                
+
                 <div style={{
                     padding: '1rem',
                     background: 'var(--light-color)',
@@ -437,7 +507,7 @@ const Savings = ({ refreshKey }) => {
                         ${metrics?.dailyRequired ? metrics.dailyRequired.toFixed(2) : 'N/A'}
                     </div>
                 </div>
-                
+
                 <div style={{
                     padding: '1rem',
                     background: 'var(--light-color)',
@@ -445,17 +515,17 @@ const Savings = ({ refreshKey }) => {
                     border: '1px solid var(--border-color)'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        {metrics?.isOnTrack ? 
-                            <FiCheckCircle style={{ color: '#10B981' }} /> : 
+                        {metrics?.isOnTrack ?
+                            <FiCheckCircle style={{ color: '#10B981' }} /> :
                             <FiAlertCircle style={{ color: '#EF4444' }} />
                         }
                         <div style={{ fontSize: '0.875rem', color: 'var(--text-light)' }}>
                             Status
                         </div>
                     </div>
-                    <div style={{ 
-                        fontSize: '1.5rem', 
-                        fontWeight: '700', 
+                    <div style={{
+                        fontSize: '1.5rem',
+                        fontWeight: '700',
                         color: metrics?.isOnTrack ? '#10B981' : '#EF4444'
                     }}>
                         {metrics?.isOnTrack ? 'On Track' : 'Needs Attention'}
@@ -488,18 +558,18 @@ const Savings = ({ refreshKey }) => {
             }}>
                 <FiTarget />
             </div>
-            
-            <h2 style={{ 
-                fontSize: '1.75rem', 
-                fontWeight: '700', 
+
+            <h2 style={{
+                fontSize: '1.75rem',
+                fontWeight: '700',
                 color: 'var(--text-color)',
                 margin: '0 0 0.75rem 0'
             }}>
                 No Savings Goal Set
             </h2>
-            
-            <p style={{ 
-                fontSize: '1rem', 
+
+            <p style={{
+                fontSize: '1rem',
                 color: 'var(--text-light)',
                 maxWidth: '500px',
                 margin: '0 auto 2rem',
@@ -507,8 +577,8 @@ const Savings = ({ refreshKey }) => {
             }}>
                 Set a savings goal to track your progress and stay motivated. You can set goals for emergencies, travel, education, or any other purpose.
             </p>
-            
-            <button 
+
+            <button
                 onClick={() => setShowGoalModal(true)}
                 style={{
                     padding: '1rem 2rem',
@@ -536,7 +606,7 @@ const Savings = ({ refreshKey }) => {
             >
                 <FiPlus /> Set Your First Goal
             </button>
-            
+
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -550,7 +620,7 @@ const Savings = ({ refreshKey }) => {
                     { icon: '🎓', title: 'Education', desc: 'Courses and learning' },
                     { icon: '🚗', title: 'Vehicle', desc: 'Car or bike purchase' }
                 ].map((suggestion, index) => (
-                    <div 
+                    <div
                         key={index}
                         style={{
                             padding: '1rem',
@@ -612,7 +682,7 @@ const Savings = ({ refreshKey }) => {
                     <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>
                         {editMode ? 'Edit Goal' : 'Set Savings Goal'}
                     </h2>
-                    <button 
+                    <button
                         onClick={() => {
                             setShowGoalModal(false);
                             setEditMode(false);
@@ -638,7 +708,7 @@ const Savings = ({ refreshKey }) => {
                         ×
                     </button>
                 </div>
-                
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-color)' }}>
@@ -660,7 +730,7 @@ const Savings = ({ refreshKey }) => {
                             }}
                         />
                     </div>
-                    
+
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-color)' }}>
@@ -693,7 +763,7 @@ const Savings = ({ refreshKey }) => {
                                 />
                             </div>
                         </div>
-                        
+
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-color)' }}>
                                 Target Date
@@ -714,7 +784,7 @@ const Savings = ({ refreshKey }) => {
                             />
                         </div>
                     </div>
-                    
+
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-color)' }}>
                             Current Amount Saved
@@ -746,7 +816,7 @@ const Savings = ({ refreshKey }) => {
                             />
                         </div>
                     </div>
-                    
+
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-color)' }}>
                             Category
@@ -776,9 +846,9 @@ const Savings = ({ refreshKey }) => {
                         </select>
                     </div>
                 </div>
-                
+
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                    <button 
+                    <button
                         onClick={() => {
                             setShowGoalModal(false);
                             setEditMode(false);
@@ -805,7 +875,7 @@ const Savings = ({ refreshKey }) => {
                     >
                         Cancel
                     </button>
-                    <button 
+                    <button
                         onClick={handleSaveGoal}
                         style={{
                             flex: 1,
@@ -836,14 +906,14 @@ const Savings = ({ refreshKey }) => {
                 <div className="header-actions">
                     {savingsGoal && (
                         <>
-                            <button 
+                            <button
                                 onClick={shareGoal}
                                 className="btn-secondary"
                                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                             >
                                 <FiShare /> Share
                             </button>
-                            <button 
+                            <button
                                 onClick={exportSavingsReport}
                                 className="btn-secondary"
                                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
@@ -852,7 +922,7 @@ const Savings = ({ refreshKey }) => {
                             </button>
                         </>
                     )}
-                    <button 
+                    <button
                         onClick={() => setShowGoalModal(true)}
                         className="btn-primary"
                         style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
@@ -861,7 +931,7 @@ const Savings = ({ refreshKey }) => {
                     </button>
                 </div>
             </div>
-            
+
             {loading ? (
                 <div style={{
                     display: 'flex',
@@ -878,7 +948,7 @@ const Savings = ({ refreshKey }) => {
                 <>
                     {/* Main Goal Section */}
                     {savingsGoal ? <SavingsGoalCard /> : <NoGoalCard />}
-                    
+
                     {/* Charts Section - Only show if we have a goal */}
                     {savingsGoal && (
                         <div style={{
@@ -894,9 +964,9 @@ const Savings = ({ refreshKey }) => {
                                 padding: '1.75rem',
                                 border: '1px solid var(--border-color)'
                             }}>
-                                <h3 style={{ 
-                                    fontSize: '1.25rem', 
-                                    fontWeight: '700', 
+                                <h3 style={{
+                                    fontSize: '1.25rem',
+                                    fontWeight: '700',
                                     color: 'var(--text-color)',
                                     margin: '0 0 1.5rem 0',
                                     display: 'flex',
@@ -916,7 +986,7 @@ const Savings = ({ refreshKey }) => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {/* Savings Allocation */}
                             <div style={{
                                 background: 'var(--card-bg)',
@@ -924,9 +994,9 @@ const Savings = ({ refreshKey }) => {
                                 padding: '1.75rem',
                                 border: '1px solid var(--border-color)'
                             }}>
-                                <h3 style={{ 
-                                    fontSize: '1.25rem', 
-                                    fontWeight: '700', 
+                                <h3 style={{
+                                    fontSize: '1.25rem',
+                                    fontWeight: '700',
                                     color: 'var(--text-color)',
                                     margin: '0 0 1.5rem 0',
                                     display: 'flex',
@@ -952,7 +1022,7 @@ const Savings = ({ refreshKey }) => {
                                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                                 ))}
                                             </Pie>
-                                            <Tooltip 
+                                            <Tooltip
                                                 formatter={(value) => [`${value}%`, 'Allocation']}
                                             />
                                         </PieChart>
@@ -961,7 +1031,7 @@ const Savings = ({ refreshKey }) => {
                             </div>
                         </div>
                     )}
-                    
+
                     {/* Tips & Suggestions */}
                     <div style={{
                         background: 'var(--card-bg)',
@@ -969,9 +1039,9 @@ const Savings = ({ refreshKey }) => {
                         padding: '1.75rem',
                         border: '1px solid var(--border-color)'
                     }}>
-                        <h3 style={{ 
-                            fontSize: '1.25rem', 
-                            fontWeight: '700', 
+                        <h3 style={{
+                            fontSize: '1.25rem',
+                            fontWeight: '700',
                             color: 'var(--text-color)',
                             margin: '0 0 1.5rem 0'
                         }}>
@@ -1010,22 +1080,22 @@ const Savings = ({ refreshKey }) => {
                                     borderRadius: '12px',
                                     border: '1px solid var(--border-color)'
                                 }}>
-                                    <div style={{ 
-                                        fontSize: '1.5rem', 
-                                        marginBottom: '0.75rem' 
+                                    <div style={{
+                                        fontSize: '1.5rem',
+                                        marginBottom: '0.75rem'
                                     }}>
                                         {tip.icon}
                                     </div>
-                                    <div style={{ 
-                                        fontSize: '1rem', 
-                                        fontWeight: '600', 
+                                    <div style={{
+                                        fontSize: '1rem',
+                                        fontWeight: '600',
                                         color: 'var(--text-color)',
                                         marginBottom: '0.5rem'
                                     }}>
                                         {tip.title}
                                     </div>
-                                    <div style={{ 
-                                        fontSize: '0.875rem', 
+                                    <div style={{
+                                        fontSize: '0.875rem',
                                         color: 'var(--text-light)',
                                         lineHeight: 1.5
                                     }}>
@@ -1037,7 +1107,93 @@ const Savings = ({ refreshKey }) => {
                     </div>
                 </>
             )}
-            
+
+            {/* Add Funds Modal */}
+            {showAddFundsModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                    padding: '1rem'
+                }}>
+                    <div style={{
+                        background: 'var(--card-bg)',
+                        borderRadius: '16px',
+                        padding: '2rem',
+                        width: '100%',
+                        maxWidth: '400px',
+                        border: '1px solid var(--border-color)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>
+                                Invest / Add Funds
+                            </h2>
+                            <button
+                                onClick={() => setShowAddFundsModal(false)}
+                                style={{ background: 'none', border: 'none', color: 'var(--text-light)', fontSize: '1.5rem', cursor: 'pointer' }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleAddFunds}>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-color)' }}>
+                                    Amount to Invest
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }}>$</span>
+                                    <input
+                                        type="number"
+                                        value={addFundsAmount}
+                                        onChange={(e) => setAddFundsAmount(e.target.value)}
+                                        placeholder="0.00"
+                                        min="0.01"
+                                        step="0.01"
+                                        autoFocus
+                                        required
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.875rem 1rem 0.875rem 2.5rem',
+                                            border: '1px solid var(--border-color)',
+                                            borderRadius: '8px',
+                                            background: 'var(--card-bg)',
+                                            color: 'var(--text-color)',
+                                            fontSize: '1.25rem',
+                                            fontWeight: '600'
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                style={{
+                                    width: '100%',
+                                    padding: '1rem',
+                                    background: 'var(--primary-color)',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    color: 'white',
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Confirm Investment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             {/* Modals */}
             {showGoalModal && <GoalModal />}
         </div>
