@@ -1,5 +1,8 @@
--- Remove the DELETE statements - tables will be created by JPA automatically
 -- DO NOT DELETE FROM tables that don't exist yet
+
+-- Insert default user
+INSERT INTO users (username, password, email, full_name) VALUES
+('admin', 'password123', 'admin@example.com', 'Madhuka');
 
 -- Insert sample transactions
 INSERT INTO transactions (description, category, date, amount, type) VALUES

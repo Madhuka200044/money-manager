@@ -186,6 +186,37 @@ export const deleteBill = async (id) => {
     }
 };
 
+// Auth APIs
+export const login = async (credentials) => {
+    try {
+        const response = await api.post('/auth/login', credentials);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Login error:', error);
+        throw error;
+    }
+};
+
+export const register = async (userData) => {
+    try {
+        const response = await api.post('/auth/register', userData);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Registration error:', error);
+        throw error;
+    }
+};
+
+export const updateCredentials = async (userId, credentials) => {
+    try {
+        const response = await api.put(`/auth/update/${userId}`, credentials);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Update credentials error:', error);
+        throw error;
+    }
+};
+
 // Settings APIs
 export const getSettings = async () => {
     try {

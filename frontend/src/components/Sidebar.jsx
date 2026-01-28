@@ -2,10 +2,10 @@ import React from 'react';
 import {
     FiCreditCard, FiTarget, FiSettings, FiHome,
     FiBarChart2, FiTrendingUp, FiBell, FiUser,
-    FiMoon, FiSun
+    FiMoon, FiSun, FiLogOut
 } from 'react-icons/fi';
 
-const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme, userProfile }) => {
+const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme, userProfile, onLogout }) => {
     const menuItems = [
         { icon: <FiHome />, label: 'Dashboard', id: 'dashboard' },
         { icon: <FiCreditCard />, label: 'Transactions', id: 'transactions' },
@@ -174,6 +174,33 @@ const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme, userProfile
                         </span>
                     </div>
                 ))}
+
+                {/* Logout Button */}
+                <div
+                    className="nav-item logout-item"
+                    onClick={onLogout}
+                    style={{
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        padding: '0.875rem 1rem',
+                        color: '#EF4444',
+                        textDecoration: 'none',
+                        borderRadius: '10px',
+                        transition: 'all 0.3s ease',
+                        fontWeight: '600',
+                        margin: '1rem 0 0 0',
+                        border: '1px solid rgba(239, 68, 68, 0.1)'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                    <span className="nav-icon" style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center' }}>
+                        <FiLogOut />
+                    </span>
+                    <span className="nav-label" style={{ fontSize: '0.95rem' }}>Logout</span>
+                </div>
             </nav>
 
             {/* User Profile */}

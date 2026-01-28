@@ -4,11 +4,11 @@ import { toast } from 'react-toastify';
 
 import { saveSettings, getSettings } from '../services/api';
 
-const Settings = ({ isDarkMode, toggleTheme, onProfileUpdate }) => {
+const Settings = ({ isDarkMode, toggleTheme, onProfileUpdate, user }) => {
     const [settings, setSettings] = useState({
         profile: {
-            name: 'Alex Johnson',
-            email: 'alex.johnson@example.com',
+            name: user?.name || 'Alex Johnson',
+            email: user?.email || 'alex.johnson@example.com',
             currency: 'USD',
             language: 'en'
         },
@@ -30,6 +30,48 @@ const Settings = ({ isDarkMode, toggleTheme, onProfileUpdate }) => {
 
     const [activeTab, setActiveTab] = useState('profile');
     const [loading, setLoading] = useState(false);
+    const [securityData, setSecurityData] = useState({
+        username: user?.username || '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+
+    const handleSecurityChange = (e) => {
+        setSecurityData({ ...securityData, [e.target.name]: e.target.value });
+    };
+
+    const handleUpdateCredentials = async (e) => {
+        if (e) e.preventDefault();
+
+        if (!user?.id) {
+            toast.error("User session not found. Please log in again.");
+            return;
+        }
+
+        if (securityData.newPassword && securityData.newPassword !== securityData.confirmPassword) {
+            toast.error("Passwords do not match!");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { updateCredentials } = await import('../services/api');
+            await updateCredentials(user.id, {
+                username: securityData.username,
+                password: securityData.newPassword || undefined
+            });
+            toast.success("Credentials updated successfully!");
+            if (onProfileUpdate) {
+                onProfileUpdate({ username: securityData.username });
+            }
+            setSecurityData(prev => ({ ...prev, newPassword: '', confirmPassword: '' }));
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to update credentials");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         const loadSettings = async () => {
@@ -196,7 +238,7 @@ const Settings = ({ isDarkMode, toggleTheme, onProfileUpdate }) => {
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `money-manager-settings-${new Date().toISOString().split('T')[0]}.json`;
+        link.download = `money - manager - settings - ${new Date().toISOString().split('T')[0]}.json`;
         link.click();
         URL.revokeObjectURL(url);
 
@@ -517,49 +559,64 @@ const Settings = ({ isDarkMode, toggleTheme, onProfileUpdate }) => {
                     {activeTab === 'security' && (
                         <div>
                             <h2 style={{ marginBottom: '1.5rem', color: 'var(--dark-color)' }}>Security Settings</h2>
-                            <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                <div style={{
-                                    padding: '1.5rem',
-                                    background: 'var(--light-color)',
-                                    borderRadius: '12px',
-                                    border: '1px solid var(--border-color)'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                                        <div style={{
-                                            width: '48px',
-                                            height: '48px',
-                                            borderRadius: '8px',
-                                            background: 'var(--card-bg)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: 'var(--primary-color)',
-                                            fontSize: '1.25rem'
-                                        }}>
-                                            <FiLock />
+                            <form onSubmit={handleUpdateCredentials} className="security-form-grid">
+                                <div className="security-card">
+                                    <h3 className="security-title">Account Credentials</h3>
+
+                                    <div style={{ display: 'grid', gap: '1.25rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Username</label>
+                                            <input
+                                                type="text"
+                                                name="username"
+                                                className="input-field"
+                                                value={securityData.username}
+                                                onChange={handleSecurityChange}
+                                                style={{ width: '100%' }}
+                                                placeholder="Change username"
+                                            />
                                         </div>
-                                        <div style={{ flex: 1 }}>
-                                            <h3 style={{ margin: 0, color: 'var(--dark-color)' }}>Change Password</h3>
-                                            <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-light)', fontSize: '0.875rem' }}>
-                                                Update your account password
-                                            </p>
+
+                                        <div className="security-input-row">
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>New Password</label>
+                                                <input
+                                                    type="password"
+                                                    name="newPassword"
+                                                    className="input-field"
+                                                    value={securityData.newPassword}
+                                                    onChange={handleSecurityChange}
+                                                    style={{ width: '100%' }}
+                                                    placeholder="••••••••"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Confirm Password</label>
+                                                <input
+                                                    type="password"
+                                                    name="confirmPassword"
+                                                    className="input-field"
+                                                    value={securityData.confirmPassword}
+                                                    onChange={handleSecurityChange}
+                                                    style={{ width: '100%' }}
+                                                    placeholder="••••••••"
+                                                />
+                                            </div>
                                         </div>
-                                        <button
-                                            className="btn-primary"
-                                            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-                                            onClick={() => toast.info('Password change feature coming soon')}
-                                        >
-                                            Change
-                                        </button>
                                     </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="btn-primary"
+                                        style={{ marginTop: '2rem', minWidth: '200px', borderRadius: '12px' }}
+                                    >
+                                        <FiSave style={{ marginRight: '0.5rem' }} />
+                                        {loading ? 'Updating...' : 'Update Credentials'}
+                                    </button>
                                 </div>
 
-                                <div style={{
-                                    padding: '1.5rem',
-                                    background: 'var(--light-color)',
-                                    borderRadius: '12px',
-                                    border: '1px solid var(--border-color)'
-                                }}>
+                                <div className="security-card">
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                                         <div style={{
                                             width: '48px',
@@ -614,7 +671,7 @@ const Settings = ({ isDarkMode, toggleTheme, onProfileUpdate }) => {
                                         </button>
                                     </div>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     )}
 
@@ -802,7 +859,7 @@ const Settings = ({ isDarkMode, toggleTheme, onProfileUpdate }) => {
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
