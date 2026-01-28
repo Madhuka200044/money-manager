@@ -41,11 +41,287 @@
     --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
+/* Settings Page Specific Styles */
+
+/* Settings Tabs */
+.settings-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    background: var(--light-color);
+}
+
+.tab-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Settings Section */
+.settings-section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin: 0;
+}
+
+/* Settings Grid */
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Setting Item */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    background: var(--light-color);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.setting-item:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.1);
+    background: var(--card-bg);
+}
+
+.setting-label {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+}
+
+.setting-description {
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: var(--primary-color);
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+/* Form Styles in Settings */
+.settings-section .form-group {
+    margin-bottom: 0;
+}
+
+.settings-section .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 0.95rem;
+}
+
+.settings-section .form-group input,
+.settings-section .form-group select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--card-bg);
+    color: var(--text-color);
+}
+
+.settings-section .form-group input:focus,
+.settings-section .form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Danger Zone */
+.danger-zone {
+    grid-column: 1 / -1;
+    padding: 1.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.danger-zone h3 {
+    color: #EF4444;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.danger-zone p {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .setting-item .btn-secondary,
+    .setting-item .btn-primary {
+        width: 100%;
+    }
+
+    .settings-tabs {
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+}
+
 /* ===== RESET & BASE STYLES ===== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+/* App.css හි switch ස්ටයිල්ස් */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: var(--primary-color);
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
 }
 
 body {
@@ -314,7 +590,8 @@ body {
 }
 
 /* ===== BUTTONS ===== */
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
     padding: 0.875rem 1.75rem;
     border-radius: 12px;
     font-weight: 600;
@@ -382,10 +659,26 @@ body {
 }
 
 /* Card color variations */
-.card:nth-child(1)::before { background: #10B981; } /* Income - Green */
-.card:nth-child(2)::before { background: #EF4444; } /* Expenses - Red */
-.card:nth-child(3)::before { background: #3B82F6; } /* Balance - Blue */
-.card:nth-child(4)::before { background: #F59E0B; } /* Savings - Yellow */
+.card:nth-child(1)::before {
+    background: #10B981;
+}
+
+/* Income - Green */
+.card:nth-child(2)::before {
+    background: #EF4444;
+}
+
+/* Expenses - Red */
+.card:nth-child(3)::before {
+    background: #3B82F6;
+}
+
+/* Balance - Blue */
+.card:nth-child(4)::before {
+    background: #F59E0B;
+}
+
+/* Savings - Yellow */
 
 .card:hover {
     transform: translateY(-5px);
@@ -489,7 +782,8 @@ body {
     gap: 2rem;
 }
 
-.left-column, .right-column {
+.left-column,
+.right-column {
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -1113,30 +1407,55 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ===== ANIMATIONS ===== */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
-    from { 
+    from {
         opacity: 0;
-        transform: translateY(30px); 
+        transform: translateY(30px);
     }
-    to { 
+
+    to {
         opacity: 1;
-        transform: translateY(0); 
+        transform: translateY(0);
     }
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-5px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(5px);
+    }
 }
 
 /* ===== SETTINGS PAGE STYLES ===== */
@@ -1231,11 +1550,11 @@ body {
     border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
     background-color: var(--primary-color);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
     transform: translateX(26px);
 }
 
@@ -1250,12 +1569,12 @@ input:checked + .slider:before {
     .dashboard-content {
         grid-template-columns: 1fr;
     }
-    
+
     .sidebar {
         width: 80px;
         padding: 1rem 0.5rem;
     }
-    
+
     .sidebar-title,
     .nav-label,
     .theme-toggle-label,
@@ -1263,17 +1582,17 @@ input:checked + .slider:before {
     .sidebar-title p {
         display: none;
     }
-    
+
     .main-content {
         margin-left: 80px;
         padding: 1.5rem;
     }
-    
+
     .theme-toggle {
         justify-content: center;
         padding: 0.75rem;
     }
-    
+
     .theme-switch {
         display: none;
     }
@@ -1284,7 +1603,7 @@ input:checked + .slider:before {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
-    
+
     .main-content {
         padding: 1.25rem;
     }
@@ -1296,40 +1615,41 @@ input:checked + .slider:before {
         gap: 1.5rem;
         margin-bottom: 2rem;
     }
-    
+
     .header-content h1 {
         font-size: 1.875rem;
     }
-    
+
     .header-actions {
         width: 100%;
         flex-wrap: wrap;
     }
-    
-    .btn-primary, .btn-secondary {
+
+    .btn-primary,
+    .btn-secondary {
         flex: 1;
         justify-content: center;
         min-width: 140px;
     }
-    
+
     .form-row {
         grid-template-columns: 1fr;
     }
-    
+
     .modal-content {
         margin: 0;
         border-radius: 0;
         max-height: 100vh;
         height: 100vh;
     }
-    
+
     .modal-actions {
         position: sticky;
         bottom: 0;
         background: var(--card-bg);
         padding-bottom: 2rem;
     }
-    
+
     .actions-grid {
         grid-template-columns: 1fr;
     }
@@ -1339,20 +1659,20 @@ input:checked + .slider:before {
     .card {
         padding: 1.5rem;
     }
-    
+
     .card-content h2 {
         font-size: 1.75rem;
     }
-    
+
     .transactions-table {
         font-size: 0.9rem;
     }
-    
+
     .transactions-table th,
     .transactions-table td {
         padding: 1rem 0.75rem;
     }
-    
+
     .card-icon-wrapper {
         width: 40px;
         height: 40px;
@@ -1382,6 +1702,7 @@ input:checked + .slider:before {
 
 /* ===== PRINT STYLES ===== */
 @media print {
+
     .sidebar,
     .header-actions,
     .quick-actions,
@@ -1390,12 +1711,12 @@ input:checked + .slider:before {
     .btn-secondary {
         display: none !important;
     }
-    
+
     .main-content {
         margin-left: 0;
         padding: 0;
     }
-    
+
     .card,
     .chart-container,
     .transactions-container,
@@ -1407,40 +1728,121 @@ input:checked + .slider:before {
 }
 
 /* ===== UTILITY CLASSES ===== */
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-left { text-align: left; }
+.text-center {
+    text-align: center;
+}
 
-.mt-1 { margin-top: 0.25rem; }
-.mt-2 { margin-top: 0.5rem; }
-.mt-3 { margin-top: 1rem; }
-.mt-4 { margin-top: 1.5rem; }
-.mt-5 { margin-top: 2rem; }
+.text-right {
+    text-align: right;
+}
 
-.mb-1 { margin-bottom: 0.25rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-3 { margin-bottom: 1rem; }
-.mb-4 { margin-bottom: 1.5rem; }
-.mb-5 { margin-bottom: 2rem; }
+.text-left {
+    text-align: left;
+}
 
-.p-1 { padding: 0.25rem; }
-.p-2 { padding: 0.5rem; }
-.p-3 { padding: 1rem; }
-.p-4 { padding: 1.5rem; }
-.p-5 { padding: 2rem; }
+.mt-1 {
+    margin-top: 0.25rem;
+}
 
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-between { justify-content: space-between; }
-.gap-1 { gap: 0.25rem; }
-.gap-2 { gap: 0.5rem; }
-.gap-3 { gap: 1rem; }
-.gap-4 { gap: 1.5rem; }
-.gap-5 { gap: 2rem; }
+.mt-2 {
+    margin-top: 0.5rem;
+}
 
-.w-full { width: 100%; }
-.h-full { height: 100%; }
+.mt-3 {
+    margin-top: 1rem;
+}
+
+.mt-4 {
+    margin-top: 1.5rem;
+}
+
+.mt-5 {
+    margin-top: 2rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
+}
+
+.mb-5 {
+    margin-bottom: 2rem;
+}
+
+.p-1 {
+    padding: 0.25rem;
+}
+
+.p-2 {
+    padding: 0.5rem;
+}
+
+.p-3 {
+    padding: 1rem;
+}
+
+.p-4 {
+    padding: 1.5rem;
+}
+
+.p-5 {
+    padding: 2rem;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.gap-1 {
+    gap: 0.25rem;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.gap-3 {
+    gap: 1rem;
+}
+
+.gap-4 {
+    gap: 1.5rem;
+}
+
+.gap-5 {
+    gap: 2rem;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.h-full {
+    height: 100%;
+}
 
 /* ===== DARK THEME SPECIFIC STYLES ===== */
 [data-theme="dark"] .transactions-table th {
@@ -1468,6 +1870,7 @@ input:checked + .slider:before {
 [data-theme="dark"] .modal-overlay {
     background: rgba(0, 0, 0, 0.7);
 }
+
 /* Add these styles to your existing App.css */
 
 /* Export Button Styles */
@@ -1669,7 +2072,7 @@ input:checked + .slider:before {
         flex-direction: column;
         width: 100%;
     }
-    
+
     .header-actions button {
         width: 100%;
     }
@@ -1971,12 +2374,19 @@ input:checked + .slider:before {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
@@ -1984,6 +2394,7 @@ input:checked + .slider:before {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1995,27 +2406,27 @@ input:checked + .slider:before {
     .modal-overlay {
         padding: 16px;
     }
-    
+
     .modal-content {
         max-width: 100%;
         margin: 0;
     }
-    
+
     .modal-header,
     .modal-content form {
         padding: 20px;
     }
-    
+
     .form-row {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
+
     .modal-actions {
         flex-direction: column;
         gap: 8px;
     }
-    
+
     .cancel-btn,
     .add-btn {
         width: 100%;
@@ -2129,7 +2540,7 @@ input:checked + .slider:before {
     .analytics-chart-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .analytics-grid {
         grid-template-columns: 1fr;
     }
@@ -2296,7 +2707,7 @@ input:checked + .slider:before {
         align-items: flex-start;
         gap: 1rem;
     }
-    
+
     .bill-actions {
         width: 100%;
         justify-content: space-between;

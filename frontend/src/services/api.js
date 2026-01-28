@@ -186,6 +186,38 @@ export const deleteBill = async (id) => {
     }
 };
 
+// Settings APIs
+export const getSettings = async () => {
+    try {
+        const response = await api.get('/settings');
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error fetching settings:', error);
+        // Return default settings if API fails
+        return {
+            data: {
+                theme: 'light',
+                username: 'Alex Johnson',
+                email: 'alex.johnson@example.com',
+                currency: 'USD',
+                language: 'en',
+                notifications: true,
+                compactMode: false
+            }
+        };
+    }
+};
+
+export const saveSettings = async (settingsData) => {
+    try {
+        const response = await api.put('/settings', settingsData);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        throw error;
+    }
+};
+
 // Generate comprehensive mock transactions for analytics
 const generateMockTransactions = () => {
     const categories = [

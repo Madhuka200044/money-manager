@@ -18,10 +18,11 @@ public class MoneyManagerApplication {
         System.out.println("  • GET /api/dashboard/stats");
         System.out.println("  • GET /api/transactions");
         System.out.println("  • GET /api/budgets");
+        System.out.println("  • GET /api/settings");
         System.out.println("H2 Console: http://localhost:8080/h2-console");
         System.out.println("=========================================\n");
     }
-    
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {

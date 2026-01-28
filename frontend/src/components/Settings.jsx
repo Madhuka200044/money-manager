@@ -1,815 +1,805 @@
+import React, { useState, useEffect } from 'react';
+import { FiUser, FiLock, FiBell, FiCreditCard, FiDollarSign, FiGlobe, FiMoon, FiSun, FiSave, FiUpload, FiDownload, FiTrash2, FiAlertCircle, FiCheck, FiX } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 
-import React, { useState } from 'react';
-import { FiUser, FiBell, FiLock, FiGlobe, FiMoon, FiSave, FiEye, FiEyeOff, FiX } from 'react-icons/fi';
+import { saveSettings, getSettings } from '../services/api';
 
-const Settings = () => {
-    // User Profile State
-    const [userProfile, setUserProfile] = useState({
-        name: 'Dulan Madhuka',
-        email: 'Dulanmadhuka@gmail.com',
-        phone: '07122226666',
-        currency: 'LKR',
-        language: 'English'
+const Settings = ({ isDarkMode, toggleTheme, onProfileUpdate }) => {
+    const [settings, setSettings] = useState({
+        profile: {
+            name: 'Alex Johnson',
+            email: 'alex.johnson@example.com',
+            currency: 'USD',
+            language: 'en'
+        },
+        preferences: {
+            notifications: true,
+            twoFactorAuth: false,
+            autoBackup: true,
+            budgetAlerts: true,
+            spendingLimits: true,
+            emailReports: true
+        },
+        display: {
+            theme: isDarkMode ? 'dark' : 'light',
+            compactMode: false,
+            showCharts: true,
+            showTips: true
+        }
     });
 
-    // Notification Preferences
-    const [notifications, setNotifications] = useState({
-        emailNotifications: true,
-        pushNotifications: true,
-        transactionAlerts: true,
-        budgetWarnings: true,
-        weeklyReports: true,
-        marketingEmails: false
-    });
-
-    // Privacy & Security
-    const [privacy, setPrivacy] = useState({
-        showAmounts: true,
-        biometricLogin: false,
-        autoLogout: 15, // minutes
-        dataSharing: false
-    });
-
-    // Display Preferences
-    const [display, setDisplay] = useState({
-        theme: 'light', // light, dark, system
-        compactMode: false,
-        showAnimations: true,
-        fontSize: 'medium' // small, medium, large
-    });
-
-    // Current Password State
-    const [passwords, setPasswords] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-    });
-    const [showPassword, setShowPassword] = useState({
-        current: false,
-        new: false,
-        confirm: false
-    });
-
-    // Loading state for save operations
+    const [activeTab, setActiveTab] = useState('profile');
     const [loading, setLoading] = useState(false);
-    const [saveMessage, setSaveMessage] = useState('');
 
-    // Handle profile updates
-    const handleProfileChange = (e) => {
-        const { name, value } = e.target;
-        setUserProfile(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+    useEffect(() => {
+        const loadSettings = async () => {
+            try {
+                // Load from backend
+                const response = await getSettings();
+                if (response.data) {
+                    // Merge backend settings with local structure if needed
+                    // For now, we assume the backend returns the flat structure or we map it
+                    // But since we created a flat backend model and the frontend is nested, we might need mapping.
+                    // Let's implement a quick mapper if the backend returns a flat object.
 
-    // Handle notification toggles
-    const handleNotificationToggle = (key) => {
-        setNotifications(prev => ({
-            ...prev,
-            [key]: !prev[key]
-        }));
-    };
-
-    // Handle privacy toggles
-    const handlePrivacyToggle = (key) => {
-        setPrivacy(prev => ({
-            ...prev,
-            [key]: !prev[key]
-        }));
-    };
-
-    // Handle display changes
-    const handleDisplayChange = (key, value) => {
-        setDisplay(prev => ({
-            ...prev,
-            [key]: value
-        }));
-    };
-
-    // Handle password change
-    const handlePasswordChange = (e) => {
-        const { name, value } = e.target;
-        setPasswords(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    // Toggle password visibility
-    const togglePasswordVisibility = (field) => {
-        setShowPassword(prev => ({
-            ...prev,
-            [field]: !prev[field]
-        }));
-    };
-
-    // Save settings
-    const saveSettings = async (section) => {
-        setLoading(true);
-        setSaveMessage('');
-        
-        try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Save to localStorage based on section
-            switch(section) {
-                case 'profile':
-                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
-                    break;
-                case 'notifications':
-                    localStorage.setItem('notificationSettings', JSON.stringify(notifications));
-                    break;
-                case 'privacy':
-                    localStorage.setItem('privacySettings', JSON.stringify(privacy));
-                    break;
-                case 'display':
-                    localStorage.setItem('displaySettings', JSON.stringify(display));
-                    break;
-                case 'password':
-                    if (passwords.newPassword !== passwords.confirmPassword) {
-                        throw new Error('New passwords do not match');
+                    const backendData = response.data;
+                    // Check if it's the new flat structure
+                    if (backendData.username) {
+                        setSettings(prev => ({
+                            profile: {
+                                name: backendData.username || prev.profile.name,
+                                email: backendData.email || prev.profile.email,
+                                currency: backendData.currency || prev.profile.currency,
+                                language: backendData.language || prev.profile.language
+                            },
+                            preferences: {
+                                notifications: backendData.notifications ?? prev.preferences.notifications,
+                                twoFactorAuth: backendData.twoFactorAuth ?? prev.preferences.twoFactorAuth,
+                                autoBackup: backendData.autoBackup ?? prev.preferences.autoBackup,
+                                budgetAlerts: backendData.budgetAlerts ?? prev.preferences.budgetAlerts,
+                                spendingLimits: backendData.spendingLimits ?? prev.preferences.spendingLimits,
+                                emailReports: backendData.emailReports ?? prev.preferences.emailReports
+                            },
+                            display: {
+                                theme: backendData.theme || prev.display.theme,
+                                compactMode: backendData.compactMode ?? prev.display.compactMode,
+                                showCharts: backendData.showCharts ?? prev.display.showCharts,
+                                showTips: backendData.showTips ?? prev.display.showTips
+                            }
+                        }));
                     }
-                    if (passwords.newPassword.length < 8) {
-                        throw new Error('Password must be at least 8 characters');
-                    }
-                    localStorage.setItem('passwordChanged', 'true');
-                    setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                    break;
-                default:
-                    // Save all
-                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
-                    localStorage.setItem('notificationSettings', JSON.stringify(notifications));
-                    localStorage.setItem('privacySettings', JSON.stringify(privacy));
-                    localStorage.setItem('displaySettings', JSON.stringify(display));
+                }
+            } catch (error) {
+                console.error("Failed to load settings from backend", error);
+                // Fallback to local storage
+                const savedSettings = localStorage.getItem('moneyManagerSettings');
+                if (savedSettings) {
+                    try {
+                        setSettings(JSON.parse(savedSettings));
+                    } catch (e) { console.error(e); }
+                }
             }
-            
-            setSaveMessage(`${section === 'all' ? 'All' : section.charAt(0).toUpperCase() + section.slice(1)} settings saved successfully!`);
-            
-            // Clear message after 3 seconds
-            setTimeout(() => {
-                setSaveMessage('');
-            }, 3000);
-            
+        };
+        loadSettings();
+    }, []);
+
+    // Sync theme from props
+    useEffect(() => {
+        setSettings(prev => ({
+            ...prev,
+            display: {
+                ...prev.display,
+                theme: isDarkMode ? 'dark' : 'light'
+            }
+        }));
+    }, [isDarkMode]);
+
+    const handleSettingChange = (category, key, value) => {
+        setSettings(prev => ({
+            ...prev,
+            [category]: {
+                ...prev[category],
+                [key]: value
+            }
+        }));
+    };
+
+    const handleSaveSettings = async () => {
+        setLoading(true);
+        // First save to LocalStorage for immediate persistence in browser
+        localStorage.setItem('moneyManagerSettings', JSON.stringify(settings));
+
+        try {
+            // Map to flat backend structure
+            const backendSettings = {
+                username: settings.profile.name,
+                email: settings.profile.email,
+                currency: settings.profile.currency,
+                language: settings.profile.language,
+                notifications: settings.preferences.notifications,
+                twoFactorAuth: settings.preferences.twoFactorAuth,
+                autoBackup: settings.preferences.autoBackup,
+                budgetAlerts: settings.preferences.budgetAlerts,
+                spendingLimits: settings.preferences.spendingLimits,
+                emailReports: settings.preferences.emailReports,
+                theme: settings.display.theme,
+                compactMode: settings.display.compactMode,
+                showCharts: settings.display.showCharts,
+                showTips: settings.display.showTips
+            };
+
+            await saveSettings(backendSettings);
+
+            // Update parent state (this updates the sidebar name/email)
+            if (onProfileUpdate) {
+                onProfileUpdate({
+                    name: settings.profile.name,
+                    email: settings.profile.email
+                });
+            }
+
+            // If theme changed, apply it immediately via the prop function if available, 
+            // but the user might have just toggled the switch in the UI without saving yet.
+            // The switch calls toggleTheme directly in the render method usually.
+            // Let's check how the theme switch is implemented.
+
+            toast.success('Settings saved successfully!', {
+                position: "top-right",
+                autoClose: 3000,
+            });
         } catch (error) {
-            setSaveMessage(`Error: ${error.message}`);
+            console.error("Save error details:", error.response || error);
+            const errorMessage = error.response?.data?.message || error.message || "Unknown error";
+            toast.error(`Error saving settings: ${errorMessage}. Please restart your backend server to apply new features.`, {
+                position: "top-right",
+                autoClose: 7000,
+            });
         } finally {
             setLoading(false);
         }
     };
 
-    // Export data
-    const exportData = () => {
-        const allData = {
-            userProfile,
-            notifications,
-            privacy,
-            display,
-            exportedAt: new Date().toISOString()
-        };
-        
-        const dataStr = JSON.stringify(allData, null, 2);
+    const handleResetSettings = () => {
+        if (window.confirm('Are you sure you want to reset all settings to default?')) {
+            setSettings({
+                profile: {
+                    name: 'Alex Johnson',
+                    email: 'alex.johnson@example.com',
+                    currency: 'USD',
+                    language: 'en'
+                },
+                preferences: {
+                    notifications: true,
+                    twoFactorAuth: false,
+                    autoBackup: true,
+                    budgetAlerts: true,
+                    spendingLimits: true,
+                    emailReports: true
+                },
+                display: {
+                    theme: isDarkMode ? 'dark' : 'light',
+                    compactMode: false,
+                    showCharts: true,
+                    showTips: true
+                }
+            });
+            toast.info('Settings reset to default', {
+                position: "top-right",
+                autoClose: 3000,
+            });
+        }
+    };
+
+    const exportSettings = () => {
+        const dataStr = JSON.stringify(settings, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
         link.download = `money-manager-settings-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        
-        alert('Settings exported successfully!');
+
+        toast.info('Settings exported successfully!', {
+            position: "top-right",
+            autoClose: 3000,
+        });
     };
 
-    // Reset to defaults
-    const resetToDefaults = (section) => {
-        if (window.confirm(`Are you sure you want to reset ${section} settings to defaults?`)) {
-            switch(section) {
-                case 'notifications':
-                    setNotifications({
-                        emailNotifications: true,
-                        pushNotifications: true,
-                        transactionAlerts: true,
-                        budgetWarnings: true,
-                        weeklyReports: true,
-                        marketingEmails: false
-                    });
-                    break;
-                case 'privacy':
-                    setPrivacy({
-                        showAmounts: true,
-                        biometricLogin: false,
-                        autoLogout: 15,
-                        dataSharing: false
-                    });
-                    break;
-                case 'display':
-                    setDisplay({
-                        theme: 'light',
-                        compactMode: false,
-                        showAnimations: true,
-                        fontSize: 'medium'
-                    });
-                    break;
-                default:
-                    break;
-            }
-            setSaveMessage(`${section} settings reset to defaults`);
-        }
-    };
-
-    const getPrivacyDescription = (key) => {
-        switch(key) {
-            case 'showAmounts':
-                return 'Display transaction amounts in dashboard';
-            case 'biometricLogin':
-                return 'Use fingerprint or face ID for login';
-            case 'dataSharing':
-                return 'Share anonymous usage data to improve app';
-            default:
-                return '';
-        }
-    };
+    const tabs = [
+        { id: 'profile', label: 'Profile', icon: <FiUser /> },
+        { id: 'preferences', label: 'Preferences', icon: <FiBell /> },
+        { id: 'display', label: 'Display', icon: <FiSun /> },
+        { id: 'security', label: 'Security', icon: <FiLock /> },
+        { id: 'data', label: 'Data', icon: <FiDownload /> }
+    ];
 
     return (
         <div className="dashboard">
             <div className="dashboard-header">
                 <div className="header-content">
                     <h1>Settings</h1>
-                    <p>Customize your Money Manager experience</p>
+                    <p>Manage your account preferences and settings</p>
                 </div>
                 <div className="header-actions">
-                    <button 
+                    <button
                         className="btn-secondary"
-                        onClick={exportData}
-                        style={{ gap: '0.5rem' }}
+                        onClick={handleResetSettings}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                     >
-                        <FiGlobe /> Export Settings
+                        <FiTrash2 /> Reset All
                     </button>
-                    <button 
+                    <button
                         className="btn-primary"
-                        onClick={() => saveSettings('all')}
+                        onClick={handleSaveSettings}
                         disabled={loading}
-                        style={{ gap: '0.5rem' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                     >
                         {loading ? (
                             <>
-                                <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}></div>
+                                <div className="spinner"></div>
                                 Saving...
                             </>
                         ) : (
                             <>
-                                <FiSave /> Save All Changes
+                                <FiSave /> Save Changes
                             </>
                         )}
                     </button>
                 </div>
             </div>
-            
-            {saveMessage && (
-                <div style={{
-                    background: saveMessage.includes('Error') ? '#FEF2F2' : '#DCFCE7',
-                    color: saveMessage.includes('Error') ? '#DC2626' : '#059669',
-                    padding: '1rem',
-                    borderRadius: '8px',
-                    marginBottom: '2rem',
-                    borderLeft: `4px solid ${saveMessage.includes('Error') ? '#DC2626' : '#059669'}`,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
-                    <span>{saveMessage}</span>
-                    <button 
-                        onClick={() => setSaveMessage('')}
-                        style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
-                    >
-                        <FiX />
-                    </button>
-                </div>
-            )}
-            
+
+            {/* Settings Container */}
             <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr',
-                gap: '2rem',
-                marginBottom: '2rem'
+                background: 'var(--card-bg)',
+                borderRadius: '16px',
+                border: '1px solid var(--border-color)',
+                overflow: 'hidden'
             }}>
-                {/* Profile Settings Section */}
+                {/* Tabs */}
                 <div style={{
-                    background: 'white',
-                    borderRadius: '12px',
-                    padding: '2rem',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid #E5E7EB',
-                    marginBottom: '2rem'
+                    display: 'flex',
+                    borderBottom: '1px solid var(--border-color)',
+                    background: 'var(--light-color)'
                 }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        marginBottom: '2rem',
-                        paddingBottom: '1rem',
-                        borderBottom: '2px solid #F3F4F6'
-                    }}>
-                        <FiUser size={24} style={{ color: '#4F46E5' }} />
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1F2937', margin: 0 }}>Profile Settings</h2>
-                    </div>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '1.5rem',
-                        marginBottom: '2rem'
-                    }}>
-                        <div className="form-group">
-                            <label>Full Name</label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={userProfile.name}
-                                onChange={handleProfileChange}
-                                placeholder="Enter your name"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Email Address</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={userProfile.email}
-                                onChange={handleProfileChange}
-                                placeholder="Enter your email"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Phone Number</label>
-                            <input
-                                type="tel"
-                                name="phone"
-                                value={userProfile.phone}
-                                onChange={handleProfileChange}
-                                placeholder="Enter phone number"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Preferred Currency</label>
-                            <select
-                                name="currency"
-                                value={userProfile.currency}
-                                onChange={handleProfileChange}
-                            >
-                                <option value="USD">USD ($)</option>
-                                <option value="LKR">LKR (Rs)</option>
-                                <option value="GBP">GBP (£)</option>
-                                <option value="JPY">JPY (¥)</option>
-                                <option value="CAD">CAD ($)</option>
-                                <option value="AUD">AUD ($)</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>Language</label>
-                            <select
-                                name="language"
-                                value={userProfile.language}
-                                onChange={handleProfileChange}
-                            >
-                                <option value="English">English</option>
-                                <option value="Spanish">Spanish</option>
-                                <option value="French">French</option>
-                                <option value="German">German</option>
-                                <option value="Chinese">Chinese</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: '1rem',
-                        paddingTop: '1.5rem',
-                        borderTop: '1px solid #E5E7EB'
-                    }}>
-                        <button 
-                            className="btn-secondary"
-                            onClick={() => resetToDefaults('profile')}
-                        >
-                            Reset Profile
-                        </button>
-                        <button 
-                            className="btn-primary"
-                            onClick={() => saveSettings('profile')}
-                            disabled={loading}
-                        >
-                            Save Profile
-                        </button>
-                    </div>
-                </div>
-
-                {/* Notification Settings Section */}
-                <div style={{
-                    background: 'white',
-                    borderRadius: '12px',
-                    padding: '2rem',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid #E5E7EB',
-                    marginBottom: '2rem'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        marginBottom: '2rem',
-                        paddingBottom: '1rem',
-                        borderBottom: '2px solid #F3F4F6'
-                    }}>
-                        <FiBell size={24} style={{ color: '#F59E0B' }} />
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1F2937', margin: 0 }}>Notification Settings</h2>
-                    </div>
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '1.5rem',
-                        marginBottom: '2rem'
-                    }}>
-                        {Object.entries(notifications).map(([key, value]) => (
-                            <div key={key} style={{
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            style={{
+                                padding: '1rem 1.5rem',
+                                background: activeTab === tab.id ? 'var(--card-bg)' : 'transparent',
+                                border: 'none',
+                                borderRight: '1px solid var(--border-color)',
+                                borderBottom: activeTab === tab.id ? '2px solid var(--primary-color)' : 'none',
+                                color: activeTab === tab.id ? 'var(--primary-color)' : 'var(--text-color)',
+                                fontWeight: '600',
+                                fontSize: '0.95rem',
+                                cursor: 'pointer',
                                 display: 'flex',
-                                justifyContent: 'space-between',
                                 alignItems: 'center',
-                                padding: '1rem',
-                                background: '#F9FAFB',
-                                borderRadius: '8px',
-                                border: '1px solid #E5E7EB'
-                            }}>
-                                <div>
-                                    <div style={{ fontWeight: '600', color: '#1F2937', marginBottom: '0.25rem' }}>
-                                        {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                                    </div>
-                                    <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>
-                                        {key.includes('email') ? 'Receive notifications via email' :
-                                         key.includes('push') ? 'Receive push notifications' :
-                                         key.includes('transaction') ? 'Get alerts for new transactions' :
-                                         key.includes('budget') ? 'Warnings when approaching budget limits' :
-                                         key.includes('weekly') ? 'Weekly financial summary reports' :
-                                         'Marketing and promotional emails'}
-                                    </div>
-                                </div>
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        checked={value}
-                                        onChange={() => handleNotificationToggle(key)}
-                                    />
-                                    <span className="slider"></span>
-                                </label>
-                            </div>
-                        ))}
-                    </div>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: '1rem',
-                        paddingTop: '1.5rem',
-                        borderTop: '1px solid #E5E7EB'
-                    }}>
-                        <button 
-                            className="btn-secondary"
-                            onClick={() => resetToDefaults('notifications')}
+                                gap: '0.5rem',
+                                transition: 'all 0.2s'
+                            }}
                         >
-                            Reset Notifications
+                            {tab.icon}
+                            {tab.label}
                         </button>
-                        <button 
-                            className="btn-primary"
-                            onClick={() => saveSettings('notifications')}
-                            disabled={loading}
-                        >
-                            Save Notifications
-                        </button>
-                    </div>
+                    ))}
                 </div>
 
-                {/* Privacy & Security Section */}
-                <div style={{
-                    background: 'white',
-                    borderRadius: '12px',
-                    padding: '2rem',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid #E5E7EB',
-                    marginBottom: '2rem'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        marginBottom: '2rem',
-                        paddingBottom: '1rem',
-                        borderBottom: '2px solid #F3F4F6'
-                    }}>
-                        <FiLock size={24} style={{ color: '#EF4444' }} />
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1F2937', margin: 0 }}>Privacy & Security</h2>
-                    </div>
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '1.5rem',
-                        marginBottom: '2rem'
-                    }}>
-                        {Object.entries(privacy).map(([key, value]) => (
-                            key === 'autoLogout' ? (
-                                <div key={key} style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    padding: '1rem',
-                                    background: '#F9FAFB',
-                                    borderRadius: '8px',
-                                    border: '1px solid #E5E7EB'
-                                }}>
+                {/* Tab Content */}
+                <div style={{ padding: '2rem' }}>
+                    {/* Profile Tab */}
+                    {activeTab === 'profile' && (
+                        <div>
+                            <h2 style={{ marginBottom: '1.5rem', color: 'var(--dark-color)' }}>Profile Settings</h2>
+                            <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--dark-color)' }}>
+                                        Full Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={settings.profile.name}
+                                        onChange={(e) => handleSettingChange('profile', 'name', e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border-color)',
+                                            background: 'var(--card-bg)',
+                                            color: 'var(--text-color)',
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--dark-color)' }}>
+                                        Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={settings.profile.email}
+                                        onChange={(e) => handleSettingChange('profile', 'email', e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border-color)',
+                                            background: 'var(--card-bg)',
+                                            color: 'var(--text-color)',
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div>
-                                        <div style={{ fontWeight: '600', color: '#1F2937', marginBottom: '0.25rem' }}>Auto Logout Timer</div>
-                                        <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>
-                                            Automatically log out after {value} minutes of inactivity
-                                        </div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--dark-color)' }}>
+                                            Currency
+                                        </label>
+                                        <select
+                                            value={settings.profile.currency}
+                                            onChange={(e) => handleSettingChange('profile', 'currency', e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--border-color)',
+                                                background: 'var(--card-bg)',
+                                                color: 'var(--text-color)',
+                                                fontSize: '1rem'
+                                            }}
+                                        >
+                                            <option value="USD">US Dollar (USD)</option>
+                                            <option value="EUR">Euro (EUR)</option>
+                                            <option value="GBP">British Pound (GBP)</option>
+                                            <option value="JPY">Japanese Yen (JPY)</option>
+                                            <option value="CAD">Canadian Dollar (CAD)</option>
+                                            <option value="AUD">Australian Dollar (AUD)</option>
+                                        </select>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <input
-                                            type="range"
-                                            min="1"
-                                            max="60"
-                                            value={value}
-                                            onChange={(e) => setPrivacy(prev => ({ ...prev, autoLogout: parseInt(e.target.value) }))}
-                                            style={{ width: '150px' }}
-                                        />
-                                        <span style={{ fontWeight: '600', minWidth: '30px' }}>{value}m</span>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--dark-color)' }}>
+                                            Language
+                                        </label>
+                                        <select
+                                            value={settings.profile.language}
+                                            onChange={(e) => handleSettingChange('profile', 'language', e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--border-color)',
+                                                background: 'var(--card-bg)',
+                                                color: 'var(--text-color)',
+                                                fontSize: '1rem'
+                                            }}
+                                        >
+                                            <option value="en">English</option>
+                                            <option value="es">Spanish</option>
+                                            <option value="fr">French</option>
+                                            <option value="de">German</option>
+                                            <option value="zh">Chinese</option>
+                                        </select>
                                     </div>
                                 </div>
-                            ) : (
-                                <div key={key} style={{
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Preferences Tab */}
+                    {activeTab === 'preferences' && (
+                        <div>
+                            <h2 style={{ marginBottom: '1.5rem', color: 'var(--dark-color)' }}>Preferences</h2>
+                            <div style={{ display: 'grid', gap: '1rem' }}>
+                                {Object.entries(settings.preferences).map(([key, value]) => (
+                                    <div key={key} style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '1rem',
+                                        background: 'var(--light-color)',
+                                        borderRadius: '8px',
+                                        border: '1px solid var(--border-color)'
+                                    }}>
+                                        <div>
+                                            <div style={{ fontWeight: '600', color: 'var(--dark-color)', textTransform: 'capitalize' }}>
+                                                {key.replace(/([A-Z])/g, ' $1')}
+                                            </div>
+                                            <div style={{ fontSize: '0.875rem', color: 'var(--text-light)', marginTop: '0.25rem' }}>
+                                                {key === 'notifications' && 'Receive notifications for important updates'}
+                                                {key === 'twoFactorAuth' && 'Enable two-factor authentication for extra security'}
+                                                {key === 'autoBackup' && 'Automatically backup your data'}
+                                                {key === 'budgetAlerts' && 'Get alerts when approaching budget limits'}
+                                                {key === 'spendingLimits' && 'Notify when spending exceeds limits'}
+                                                {key === 'emailReports' && 'Send weekly reports to your email'}
+                                            </div>
+                                        </div>
+                                        <label className="switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={value}
+                                                onChange={(e) => handleSettingChange('preferences', key, e.target.checked)}
+                                            />
+                                            <span className="slider"></span>
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Display Tab */}
+                    {activeTab === 'display' && (
+                        <div>
+                            <h2 style={{ marginBottom: '1.5rem', color: 'var(--dark-color)' }}>Display Settings</h2>
+                            <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                <div style={{
                                     display: 'flex',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
                                     padding: '1rem',
-                                    background: '#F9FAFB',
+                                    background: 'var(--light-color)',
                                     borderRadius: '8px',
-                                    border: '1px solid #E5E7EB'
+                                    border: '1px solid var(--border-color)'
                                 }}>
-                                    <div>
-                                        <div style={{ fontWeight: '600', color: '#1F2937', marginBottom: '0.25rem' }}>
-                                            {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            borderRadius: '8px',
+                                            background: 'var(--card-bg)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: isDarkMode ? '#F59E0B' : '#374151'
+                                        }}>
+                                            {isDarkMode ? <FiMoon /> : <FiSun />}
                                         </div>
-                                        <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>
-                                            {getPrivacyDescription(key)}
+                                        <div>
+                                            <div style={{ fontWeight: '600', color: 'var(--dark-color)' }}>
+                                                Theme
+                                            </div>
+                                            <div style={{ fontSize: '0.875rem', color: 'var(--text-light)' }}>
+                                                {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+                                            </div>
                                         </div>
                                     </div>
                                     <label className="switch">
                                         <input
                                             type="checkbox"
-                                            checked={value}
-                                            onChange={() => handlePrivacyToggle(key)}
+                                            checked={isDarkMode}
+                                            onChange={toggleTheme}
                                         />
                                         <span className="slider"></span>
                                     </label>
                                 </div>
-                            )
-                        ))}
-                        
-                        {/* Password Change Section */}
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'stretch',
-                            gap: '1rem',
-                            padding: '1rem',
-                            background: '#F9FAFB',
-                            borderRadius: '8px',
-                            border: '1px solid #E5E7EB'
-                        }}>
-                            <div>
-                                <div style={{ fontWeight: '600', color: '#1F2937', marginBottom: '0.25rem' }}>Change Password</div>
-                                <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>
-                                    Update your account password
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {['currentPassword', 'newPassword', 'confirmPassword'].map((field) => (
-                                    <div key={field} className="form-group">
-                                        <label>
-                                            {field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                                        </label>
-                                        <div style={{ position: 'relative' }}>
-                                            <input
-                                                type={showPassword[field.replace('Password', '').toLowerCase()] ? 'text' : 'password'}
-                                                name={field}
-                                                value={passwords[field]}
-                                                onChange={handlePasswordChange}
-                                                placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
-                                                style={{ paddingRight: '40px', width: '100%' }}
-                                            />
-                                            <button
-                                                type="button"
-                                                style={{
-                                                    position: 'absolute',
-                                                    right: '10px',
-                                                    top: '50%',
-                                                    transform: 'translateY(-50%)',
-                                                    background: 'none',
-                                                    border: 'none',
-                                                    color: '#6B7280',
-                                                    cursor: 'pointer',
-                                                    padding: '4px'
-                                                }}
-                                                onClick={() => togglePasswordVisibility(field.replace('Password', '').toLowerCase())}
-                                            >
-                                                {showPassword[field.replace('Password', '').toLowerCase()] ? <FiEyeOff /> : <FiEye />}
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                                <button 
-                                    className="btn-primary"
-                                    onClick={() => saveSettings('password')}
-                                    disabled={loading || !passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword}
-                                    style={{ marginTop: '1rem' }}
-                                >
-                                    Update Password
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: '1rem',
-                        paddingTop: '1.5rem',
-                        borderTop: '1px solid #E5E7EB'
-                    }}>
-                        <button 
-                            className="btn-secondary"
-                            onClick={() => resetToDefaults('privacy')}
-                        >
-                            Reset Privacy
-                        </button>
-                        <button 
-                            className="btn-primary"
-                            onClick={() => saveSettings('privacy')}
-                            disabled={loading}
-                        >
-                            Save Privacy
-                        </button>
-                    </div>
-                </div>
 
-                {/* Display Preferences Section */}
-                <div style={{
-                    background: 'white',
-                    borderRadius: '12px',
-                    padding: '2rem',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid #E5E7EB',
-                    marginBottom: '2rem'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        marginBottom: '2rem',
-                        paddingBottom: '1rem',
-                        borderBottom: '2px solid #F3F4F6'
-                    }}>
-                        <FiMoon size={24} style={{ color: '#8B5CF6' }} />
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1F2937', margin: 0 }}>Display Preferences</h2>
-                    </div>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '1.5rem',
-                        marginBottom: '2rem'
-                    }}>
-                        <div className="form-group">
-                            <label>Theme</label>
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-                                {['light', 'dark', 'system'].map((theme) => (
-                                    <label key={theme} style={{ cursor: 'pointer', flex: 1 }}>
-                                        <input
-                                            type="radio"
-                                            name="theme"
-                                            value={theme}
-                                            checked={display.theme === theme}
-                                            onChange={() => handleDisplayChange('theme', theme)}
-                                            style={{ display: 'none' }}
-                                        />
-                                        <div style={{
+                                {Object.entries(settings.display).map(([key, value]) => {
+                                    if (key === 'theme') return null;
+                                    return (
+                                        <div key={key} style={{
                                             display: 'flex',
-                                            flexDirection: 'column',
+                                            justifyContent: 'space-between',
                                             alignItems: 'center',
-                                            justifyContent: 'center',
                                             padding: '1rem',
+                                            background: 'var(--light-color)',
                                             borderRadius: '8px',
-                                            fontWeight: '600',
-                                            border: '2px solid #E5E7EB',
-                                            background: 'white',
-                                            transition: 'all 0.3s ease',
-                                            borderColor: display.theme === theme ? '#4F46E5' : '#E5E7EB',
-                                            background: display.theme === theme ? '#4F46E5' : 'white',
-                                            color: display.theme === theme ? 'white' : 'inherit'
+                                            border: '1px solid var(--border-color)'
                                         }}>
-                                            {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                                            <div>
+                                                <div style={{ fontWeight: '600', color: 'var(--dark-color)', textTransform: 'capitalize' }}>
+                                                    {key.replace(/([A-Z])/g, ' $1')}
+                                                </div>
+                                                <div style={{ fontSize: '0.875rem', color: 'var(--text-light)', marginTop: '0.25rem' }}>
+                                                    {key === 'compactMode' && 'Use compact layout for better space utilization'}
+                                                    {key === 'showCharts' && 'Show charts and graphs in dashboard'}
+                                                    {key === 'showTips' && 'Show helpful tips and suggestions'}
+                                                </div>
+                                            </div>
+                                            <label className="switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={value}
+                                                    onChange={(e) => handleSettingChange('display', key, e.target.checked)}
+                                                />
+                                                <span className="slider"></span>
+                                            </label>
                                         </div>
-                                    </label>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
-                        <div className="form-group">
-                            <label>Font Size</label>
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-                                {['small', 'medium', 'large'].map((size) => (
-                                    <label key={size} style={{ cursor: 'pointer', flex: 1 }}>
-                                        <input
-                                            type="radio"
-                                            name="fontSize"
-                                            value={size}
-                                            checked={display.fontSize === size}
-                                            onChange={() => handleDisplayChange('fontSize', size)}
-                                            style={{ display: 'none' }}
-                                        />
+                    )}
+
+                    {/* Security Tab */}
+                    {activeTab === 'security' && (
+                        <div>
+                            <h2 style={{ marginBottom: '1.5rem', color: 'var(--dark-color)' }}>Security Settings</h2>
+                            <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                <div style={{
+                                    padding: '1.5rem',
+                                    background: 'var(--light-color)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                                         <div style={{
+                                            width: '48px',
+                                            height: '48px',
+                                            borderRadius: '8px',
+                                            background: 'var(--card-bg)',
                                             display: 'flex',
-                                            flexDirection: 'column',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            padding: '1rem',
-                                            borderRadius: '8px',
-                                            fontWeight: '600',
-                                            border: '2px solid #E5E7EB',
-                                            background: 'white',
-                                            transition: 'all 0.3s ease',
-                                            borderColor: display.fontSize === size ? '#4F46E5' : '#E5E7EB',
-                                            background: display.fontSize === size ? '#4F46E5' : 'white',
-                                            color: display.fontSize === size ? 'white' : 'inherit'
+                                            color: 'var(--primary-color)',
+                                            fontSize: '1.25rem'
                                         }}>
-                                            {size.charAt(0).toUpperCase() + size.slice(1)}
-                                            <div style={{ 
-                                                marginTop: '0.5rem', 
-                                                fontWeight: '700',
-                                                fontSize: size === 'small' ? '12px' : size === 'medium' ? '14px' : '16px'
-                                            }}>
-                                                Aa
+                                            <FiLock />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <h3 style={{ margin: 0, color: 'var(--dark-color)' }}>Change Password</h3>
+                                            <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-light)', fontSize: '0.875rem' }}>
+                                                Update your account password
+                                            </p>
+                                        </div>
+                                        <button
+                                            className="btn-primary"
+                                            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                                            onClick={() => toast.info('Password change feature coming soon')}
+                                        >
+                                            Change
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style={{
+                                    padding: '1.5rem',
+                                    background: 'var(--light-color)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div style={{
+                                            width: '48px',
+                                            height: '48px',
+                                            borderRadius: '8px',
+                                            background: 'var(--card-bg)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'var(--primary-color)',
+                                            fontSize: '1.25rem'
+                                        }}>
+                                            <FiCreditCard />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <h3 style={{ margin: 0, color: 'var(--dark-color)' }}>Two-Factor Authentication</h3>
+                                            <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-light)', fontSize: '0.875rem' }}>
+                                                Add an extra layer of security to your account
+                                            </p>
+                                        </div>
+                                        <label className="switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.preferences.twoFactorAuth}
+                                                onChange={(e) => handleSettingChange('preferences', 'twoFactorAuth', e.target.checked)}
+                                            />
+                                            <span className="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div style={{
+                                    padding: '1.5rem',
+                                    background: 'var(--light-color)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <h3 style={{ margin: '0 0 1rem 0', color: 'var(--dark-color)' }}>Active Sessions</h3>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div>
+                                            <div style={{ fontWeight: '600', color: 'var(--dark-color)' }}>Current Session</div>
+                                            <div style={{ fontSize: '0.875rem', color: 'var(--text-light)' }}>
+                                                Chrome • Windows • Now
                                             </div>
                                         </div>
-                                    </label>
-                                ))}
+                                        <button
+                                            className="btn-secondary"
+                                            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                                            onClick={() => toast.info('Session management coming soon')}
+                                        >
+                                            Manage
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div className="form-group">
-                            <label>Compact Mode</label>
-                            <label className="switch">
-                                <input
-                                    type="checkbox"
-                                    checked={display.compactMode}
-                                    onChange={() => handleDisplayChange('compactMode', !display.compactMode)}
-                                />
-                                <span className="slider"></span>
-                            </label>
-                            <div style={{ fontSize: '0.875rem', color: '#6B7280', marginTop: '0.5rem' }}>
-                                Reduce padding and spacing for more content
+                    )}
+
+                    {/* Data Tab */}
+                    {activeTab === 'data' && (
+                        <div>
+                            <h2 style={{ marginBottom: '1.5rem', color: 'var(--dark-color)' }}>Data Management</h2>
+                            <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                <div style={{
+                                    padding: '1.5rem',
+                                    background: 'var(--light-color)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div style={{
+                                            width: '48px',
+                                            height: '48px',
+                                            borderRadius: '8px',
+                                            background: 'var(--card-bg)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'var(--primary-color)',
+                                            fontSize: '1.25rem'
+                                        }}>
+                                            <FiDownload />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <h3 style={{ margin: 0, color: 'var(--dark-color)' }}>Export Data</h3>
+                                            <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-light)', fontSize: '0.875rem' }}>
+                                                Download all your data as JSON file
+                                            </p>
+                                        </div>
+                                        <button
+                                            className="btn-primary"
+                                            onClick={exportSettings}
+                                            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                                        >
+                                            Export
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style={{
+                                    padding: '1.5rem',
+                                    background: 'var(--light-color)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div style={{
+                                            width: '48px',
+                                            height: '48px',
+                                            borderRadius: '8px',
+                                            background: 'var(--card-bg)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'var(--primary-color)',
+                                            fontSize: '1.25rem'
+                                        }}>
+                                            <FiUpload />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <h3 style={{ margin: 0, color: 'var(--dark-color)' }}>Import Data</h3>
+                                            <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-light)', fontSize: '0.875rem' }}>
+                                                Import data from JSON file
+                                            </p>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            id="importFile"
+                                            accept=".json"
+                                            style={{ display: 'none' }}
+                                            onChange={(e) => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                    const reader = new FileReader();
+                                                    reader.onload = (event) => {
+                                                        try {
+                                                            const imported = JSON.parse(event.target.result);
+                                                            setSettings(imported);
+                                                            toast.success('Settings imported successfully!');
+                                                        } catch (error) {
+                                                            toast.error('Invalid settings file');
+                                                        }
+                                                    };
+                                                    reader.readAsText(file);
+                                                }
+                                            }}
+                                        />
+                                        <label htmlFor="importFile" className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', cursor: 'pointer' }}>
+                                            Import
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div style={{
+                                    padding: '1.5rem',
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    borderRadius: '12px',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div style={{
+                                            width: '48px',
+                                            height: '48px',
+                                            borderRadius: '8px',
+                                            background: 'rgba(239, 68, 68, 0.2)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#EF4444',
+                                            fontSize: '1.25rem'
+                                        }}>
+                                            <FiAlertCircle />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <h3 style={{ margin: 0, color: '#EF4444' }}>Delete All Data</h3>
+                                            <p style={{ margin: '0.25rem 0 0 0', color: '#EF4444', fontSize: '0.875rem', opacity: 0.8 }}>
+                                                This will permanently delete all your data. This action cannot be undone.
+                                            </p>
+                                        </div>
+                                        <button
+                                            className="btn-secondary"
+                                            style={{
+                                                padding: '0.5rem 1rem',
+                                                fontSize: '0.875rem',
+                                                background: '#EF4444',
+                                                color: 'white',
+                                                border: 'none'
+                                            }}
+                                            onClick={() => {
+                                                if (window.confirm('Are you absolutely sure? This will delete ALL your data permanently!')) {
+                                                    localStorage.clear();
+                                                    toast.error('All data deleted successfully');
+                                                    window.location.reload();
+                                                }
+                                            }}
+                                        >
+                                            Delete All
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div className="form-group">
-                            <label>Show Animations</label>
-                            <label className="switch">
-                                <input
-                                    type="checkbox"
-                                    checked={display.showAnimations}
-                                    onChange={() => handleDisplayChange('showAnimations', !display.showAnimations)}
-                                />
-                                <span className="slider"></span>
-                            </label>
-                            <div style={{ fontSize: '0.875rem', color: '#6B7280', marginTop: '0.5rem' }}>
-                                Enable UI animations and transitions
-                            </div>
-                        </div>
-                    </div>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: '1rem',
-                        paddingTop: '1.5rem',
-                        borderTop: '1px solid #E5E7EB'
-                    }}>
-                        <button 
-                            className="btn-secondary"
-                            onClick={() => resetToDefaults('display')}
-                        >
-                            Reset Display
-                        </button>
-                        <button 
-                            className="btn-primary"
-                            onClick={() => saveSettings('display')}
-                            disabled={loading}
-                        >
-                            Save Display
-                        </button>
-                    </div>
+                    )}
+                </div>
+            </div>
+
+            {/* App Info */}
+            <div style={{
+                marginTop: '2rem',
+                padding: '1.5rem',
+                background: 'var(--card-bg)',
+                borderRadius: '12px',
+                border: '1px solid var(--border-color)',
+                textAlign: 'center'
+            }}>
+                <div style={{ fontSize: '0.875rem', color: 'var(--text-light)' }}>
+                    Money Manager v1.0.0 • © 2024 Money Manager Team
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+                    <button
+                        className="btn-secondary"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                        onClick={() => toast.info('Privacy policy coming soon')}
+                    >
+                        Privacy Policy
+                    </button>
+                    <button
+                        className="btn-secondary"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                        onClick={() => toast.info('Terms of service coming soon')}
+                    >
+                        Terms of Service
+                    </button>
+                    <button
+                        className="btn-secondary"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                        onClick={() => window.location.href = 'mailto:support@money-manager.com'}
+                    >
+                        Contact Support
+                    </button>
                 </div>
             </div>
         </div>

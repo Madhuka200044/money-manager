@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-    FiCreditCard, FiTarget, FiSettings, FiHome, 
-    FiBarChart2, FiTrendingUp, FiBell, FiUser, 
-    FiMoon, FiSun 
+import {
+    FiCreditCard, FiTarget, FiSettings, FiHome,
+    FiBarChart2, FiTrendingUp, FiBell, FiUser,
+    FiMoon, FiSun
 } from 'react-icons/fi';
 
-const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme }) => {
+const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme, userProfile }) => {
     const menuItems = [
         { icon: <FiHome />, label: 'Dashboard', id: 'dashboard' },
         { icon: <FiCreditCard />, label: 'Transactions', id: 'transactions' },
@@ -25,10 +25,10 @@ const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme }) => {
     return (
         <div className="sidebar">
             {/* App Logo */}
-            <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '16px', 
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
                 marginBottom: '3rem',
                 padding: '0 1rem'
             }}>
@@ -70,7 +70,7 @@ const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme }) => {
                     </p>
                 </div>
             </div>
-            
+
             {/* Theme Toggle */}
             <div style={{
                 marginBottom: '2rem',
@@ -86,10 +86,10 @@ const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme }) => {
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     border: '1px solid rgba(255, 255, 255, 0.1)'
-                }} 
-                onClick={toggleTheme}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+                }}
+                    onClick={toggleTheme}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
                 >
                     <div style={{
                         display: 'flex',
@@ -137,15 +137,15 @@ const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme }) => {
                     </div>
                 </div>
             </div>
-            
+
             {/* Navigation Menu */}
             <nav className="sidebar-nav">
                 {menuItems.map((item, index) => (
-                    <div 
-                        key={index} 
+                    <div
+                        key={index}
                         className={`nav-item ${currentPage === item.id ? 'active' : ''}`}
                         onClick={() => handleNavigation(item.id)}
-                        style={{ 
+                        style={{
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -159,14 +159,14 @@ const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme }) => {
                             margin: '0.25rem 0'
                         }}
                     >
-                        <span className="nav-icon" style={{ 
+                        <span className="nav-icon" style={{
                             fontSize: '1.25rem',
                             display: 'flex',
                             alignItems: 'center'
                         }}>
                             {item.icon}
                         </span>
-                        <span className="nav-label" style={{ 
+                        <span className="nav-label" style={{
                             fontSize: '0.95rem',
                             fontWeight: '600'
                         }}>
@@ -175,7 +175,7 @@ const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme }) => {
                     </div>
                 ))}
             </nav>
-            
+
             {/* User Profile */}
             <div style={{
                 position: 'absolute',
@@ -191,10 +191,10 @@ const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme }) => {
                 cursor: 'pointer',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 transition: 'all 0.3s ease'
-            }} 
-            onClick={() => handleNavigation('settings')}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+            }}
+                onClick={() => handleNavigation('settings')}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
             >
                 <div style={{
                     width: '44px',
@@ -209,23 +209,33 @@ const Sidebar = ({ onNavigate, currentPage, isDarkMode, toggleTheme }) => {
                     fontWeight: 'bold',
                     boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
                 }}>
-                    JD
+                    {userProfile?.name
+                        ? userProfile.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+                        : 'U'}
                 </div>
                 <div style={{ flex: 1 }}>
-                    <div style={{ 
-                        color: 'white', 
+                    <div style={{
+                        color: 'white',
                         fontWeight: '700',
                         fontSize: '0.95rem',
-                        marginBottom: '2px'
+                        marginBottom: '2px',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '140px'
                     }}>
-                        John Doe
+                        {userProfile?.name || 'User'}
                     </div>
-                    <div style={{ 
-                        color: '#a5b4fc', 
+                    <div style={{
+                        color: '#a5b4fc',
                         fontSize: '0.8rem',
-                        fontWeight: '500'
+                        fontWeight: '500',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '140px'
                     }}>
-                        Premium User
+                        {userProfile?.email || 'Premium User'}
                     </div>
                 </div>
             </div>
